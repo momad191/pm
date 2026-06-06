@@ -20,11 +20,11 @@ export enum ProjectStatus {
     timestamps: true,
 })
 export class Project {
-    // @Prop({
-    //     required: true,
-    //     unique: true,
-    // })
-    // projectId: string;
+    @Prop({
+        required: true,
+        unique: true,
+    })
+    projectId: string;
 
     @Prop({
         required: true,
