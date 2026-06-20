@@ -9,141 +9,174 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import {
-  Task,
-  TaskDocument,
-  TaskStatus,
-} from './schemas/task.schema';
+  Issue,
+  IssueDocument,
+  IssueStatus,
+} from './schemas/issue.schema';
 
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { SearchTaskDto } from './dto/search-task.dto';
+import { CreateIssueDto } from './dto/create-issue.dto';
+
+import { UpdateIssueDto } from './dto/update-issue.dto';
+
+import { SearchIssueDto } from './dto/search-issue.dto';
 
 @Injectable()
-export class TaskService {
+export class IssueService {
   constructor(
-    @InjectModel(Task.name)
-    private readonly taskModel: Model<TaskDocument>,
+    @InjectModel(Issue.name)
+    private readonly issueModel: Model<IssueDocument>,
   ) {}
 
   async create(
-    createTaskDto: CreateTaskDto,
+    createIssueDto: CreateIssueDto,
   ) {
-    const existingTask =
-      await this.taskModel.findOne({
-        taskId: createTaskDto.taskId,
+    const exists =
+      await this.issueModel.findOne({
+        issueId: createIssueDto.issueId,
+
         isDeleted: false,
       });
 
-    if (existingTask) {
+    if (exists) {
       throw new ConflictException(
-        'Task ID already exists',
+        'Issue ID already exists',
       );
     }
 
-    const task =
-      await this.taskModel.create(
-        createTaskDto,
-      );
-
-    return task;
+    return this.issueModel.create(
+      createIssueDto,
+    );
   }
 
   async findAll() {
-    return this.taskModel
+    return this.issueModel
       .find({
         isDeleted: false,
       })
+
       .populate('projectId')
-      .populate('sprintId')
+
+      .populate('taskId')
+
       .populate(
         'assignedTo',
         '-password',
       )
+
+      .populate(
+        'reportedBy',
+        '-password',
+      )
+
       .sort({
         createdAt: -1,
       });
   }
 
   async findOne(id: string) {
-    const task =
-      await this.taskModel
+    const issue =
+      await this.issueModel
+
         .findById(id)
+
         .populate('projectId')
-        .populate('sprintId')
+
+        .populate('taskId')
+
         .populate(
           'assignedTo',
           '-password',
+        )
+
+        .populate(
+          'reportedBy',
+          '-password',
         );
 
-    if (!task) {
+    if (!issue) {
       throw new NotFoundException(
-        'Task not found',
+        'Issue not found',
       );
     }
 
-    return task;
+    return issue;
   }
 
   async update(
     id: string,
-    updateTaskDto: UpdateTaskDto,
+
+    updateIssueDto: UpdateIssueDto,
   ) {
-    const task =
-      await this.taskModel.findByIdAndUpdate(
+    const issue =
+      await this.issueModel.findByIdAndUpdate(
         id,
-        updateTaskDto,
+
+        updateIssueDto,
+
         {
           returnDocument: 'after',
         },
       );
 
-    if (!task) {
+    if (!issue) {
       throw new NotFoundException(
-        'Task not found',
+        'Issue not found',
       );
     }
 
-    return task;
+    return issue;
   }
 
   async remove(id: string) {
-    const task =
-      await this.taskModel.findByIdAndUpdate(
+    const issue =
+      await this.issueModel.findByIdAndUpdate(
         id,
+
         {
           isDeleted: true,
         },
+
         {
           returnDocument: 'after',
         },
       );
 
-    if (!task) {
+    if (!issue) {
       throw new NotFoundException(
-        'Task not found',
+        'Issue not found',
       );
     }
 
     return {
       success: true,
+
       message:
-        'Task deleted successfully',
+        'Issue deleted successfully',
     };
   }
 
   async search(
-    query: SearchTaskDto,
+    query: SearchIssueDto,
   ) {
     const {
       keyword,
+
       projectId,
-      sprintId,
+
+      taskId,
+
       assignedTo,
-      priority,
+
       status,
+
+      severity,
+
       page = 1,
+
       limit = 10,
+
       sortBy = 'createdAt',
+
       sortOrder = 'desc',
     } = query;
 
@@ -154,20 +187,25 @@ export class TaskService {
     if (keyword) {
       filter.$or = [
         {
-          taskId: {
+          issueId: {
             $regex: keyword,
+
             $options: 'i',
           },
         },
-        {
-          title: {
-            $regex: keyword,
-            $options: 'i',
-          },
-        },
+
         {
           description: {
             $regex: keyword,
+
+            $options: 'i',
+          },
+        },
+
+        {
+          resolutionNotes: {
+            $regex: keyword,
+
             $options: 'i',
           },
         },
@@ -175,23 +213,28 @@ export class TaskService {
     }
 
     if (projectId) {
-      filter.projectId = projectId;
+      filter.projectId =
+        projectId;
     }
 
-    if (sprintId) {
-      filter.sprintId = sprintId;
+    if (taskId) {
+      filter.taskId =
+        taskId;
     }
 
     if (assignedTo) {
-      filter.assignedTo = assignedTo;
-    }
-
-    if (priority) {
-      filter.priority = priority;
+      filter.assignedTo =
+        assignedTo;
     }
 
     if (status) {
-      filter.status = status;
+      filter.status =
+        status;
+    }
+
+    if (severity) {
+      filter.severity =
+        severity;
     }
 
     const currentPage =
@@ -201,39 +244,56 @@ export class TaskService {
       Number(limit);
 
     const data =
-      await this.taskModel
+      await this.issueModel
+
         .find(filter)
+
         .populate('projectId')
-        .populate('sprintId')
+
+        .populate('taskId')
+
         .populate(
           'assignedTo',
           '-password',
         )
+
+        .populate(
+          'reportedBy',
+          '-password',
+        )
+
         .sort({
           [sortBy]:
             sortOrder === 'asc'
               ? 1
               : -1,
         })
+
         .skip(
           (currentPage - 1) *
             pageSize,
         )
+
         .limit(pageSize);
 
     const total =
-      await this.taskModel.countDocuments(
+      await this.issueModel.countDocuments(
         filter,
       );
 
     return {
       success: true,
+
       total,
+
       page: currentPage,
+
       limit: pageSize,
+
       totalPages: Math.ceil(
         total / pageSize,
       ),
+
       data,
     };
   }
@@ -241,36 +301,56 @@ export class TaskService {
   async findByProject(
     projectId: string,
   ) {
-    return this.taskModel
+    return this.issueModel
       .find({
         projectId,
+
         isDeleted: false,
       })
+
       .populate('projectId')
-      .populate('sprintId')
+
+      .populate('taskId')
+
       .populate(
         'assignedTo',
         '-password',
       )
+
+      .populate(
+        'reportedBy',
+        '-password',
+      )
+
       .sort({
         createdAt: -1,
       });
   }
 
-  async findBySprint(
-    sprintId: string,
+  async findByTask(
+    taskId: string,
   ) {
-    return this.taskModel
+    return this.issueModel
       .find({
-        sprintId,
+        taskId,
+
         isDeleted: false,
       })
+
       .populate('projectId')
-      .populate('sprintId')
+
+      .populate('taskId')
+
       .populate(
         'assignedTo',
         '-password',
       )
+
+      .populate(
+        'reportedBy',
+        '-password',
+      )
+
       .sort({
         createdAt: -1,
       });
@@ -279,17 +359,27 @@ export class TaskService {
   async findByUser(
     userId: string,
   ) {
-    return this.taskModel
+    return this.issueModel
       .find({
         assignedTo: userId,
+
         isDeleted: false,
       })
+
       .populate('projectId')
-      .populate('sprintId')
+
+      .populate('taskId')
+
       .populate(
         'assignedTo',
         '-password',
       )
+
+      .populate(
+        'reportedBy',
+        '-password',
+      )
+
       .sort({
         createdAt: -1,
       });
@@ -297,22 +387,39 @@ export class TaskService {
 
   async updateStatus(
     id: string,
+
     status: string,
   ) {
-    const task =
-      await this.taskModel.findById(id);
+    const issue =
+      await this.issueModel.findById(
+        id,
+      );
 
-    if (!task) {
+    if (!issue) {
       throw new NotFoundException(
-        'Task not found',
+        'Issue not found',
       );
     }
 
-    task.status =
-      status as TaskStatus;
+    issue.status =
+      status as IssueStatus;
 
-    await task.save();
+    if (
+      status === 'RESOLVED'
+    ) {
+      issue.resolvedAt =
+        new Date();
+    }
 
-    return task;
+    if (
+      status === 'CLOSED'
+    ) {
+      issue.closedAt =
+        new Date();
+    }
+
+    await issue.save();
+
+    return issue;
   }
 }

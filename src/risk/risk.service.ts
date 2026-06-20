@@ -9,141 +9,152 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import {
-  Task,
-  TaskDocument,
-  TaskStatus,
-} from './schemas/task.schema';
+  Risk,
+  RiskDocument,
+  RiskStatus,
+} from './schemas/risk.schema';
 
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { SearchTaskDto } from './dto/search-task.dto';
+import { CreateRiskDto } from './dto/create-risk.dto';
+
+import { UpdateRiskDto } from './dto/update-risk.dto';
+
+import { SearchRiskDto } from './dto/search-risk.dto';
 
 @Injectable()
-export class TaskService {
+export class RiskService {
   constructor(
-    @InjectModel(Task.name)
-    private readonly taskModel: Model<TaskDocument>,
+    @InjectModel(Risk.name)
+    private readonly riskModel: Model<RiskDocument>,
   ) {}
 
   async create(
-    createTaskDto: CreateTaskDto,
+    createRiskDto: CreateRiskDto,
   ) {
-    const existingTask =
-      await this.taskModel.findOne({
-        taskId: createTaskDto.taskId,
+    const exists =
+      await this.riskModel.findOne({
+        riskId: createRiskDto.riskId,
+
         isDeleted: false,
       });
 
-    if (existingTask) {
+    if (exists) {
       throw new ConflictException(
-        'Task ID already exists',
+        'Risk ID already exists',
       );
     }
 
-    const task =
-      await this.taskModel.create(
-        createTaskDto,
-      );
-
-    return task;
+    return this.riskModel.create(
+      createRiskDto,
+    );
   }
 
   async findAll() {
-    return this.taskModel
+    return this.riskModel
       .find({
         isDeleted: false,
       })
+
       .populate('projectId')
-      .populate('sprintId')
-      .populate(
-        'assignedTo',
-        '-password',
-      )
+
+      .populate('taskId')
+
       .sort({
         createdAt: -1,
       });
   }
 
   async findOne(id: string) {
-    const task =
-      await this.taskModel
-        .findById(id)
-        .populate('projectId')
-        .populate('sprintId')
-        .populate(
-          'assignedTo',
-          '-password',
-        );
+    const risk =
+      await this.riskModel
 
-    if (!task) {
+        .findById(id)
+
+        .populate('projectId')
+
+        .populate('taskId');
+
+    if (!risk) {
       throw new NotFoundException(
-        'Task not found',
+        'Risk not found',
       );
     }
 
-    return task;
+    return risk;
   }
 
   async update(
     id: string,
-    updateTaskDto: UpdateTaskDto,
+
+    updateRiskDto: UpdateRiskDto,
   ) {
-    const task =
-      await this.taskModel.findByIdAndUpdate(
+    const risk =
+      await this.riskModel.findByIdAndUpdate(
         id,
-        updateTaskDto,
+
+        updateRiskDto,
+
         {
           returnDocument: 'after',
         },
       );
 
-    if (!task) {
+    if (!risk) {
       throw new NotFoundException(
-        'Task not found',
+        'Risk not found',
       );
     }
 
-    return task;
+    return risk;
   }
 
   async remove(id: string) {
-    const task =
-      await this.taskModel.findByIdAndUpdate(
+    const risk =
+      await this.riskModel.findByIdAndUpdate(
         id,
+
         {
           isDeleted: true,
         },
+
         {
           returnDocument: 'after',
         },
       );
 
-    if (!task) {
+    if (!risk) {
       throw new NotFoundException(
-        'Task not found',
+        'Risk not found',
       );
     }
 
     return {
       success: true,
+
       message:
-        'Task deleted successfully',
+        'Risk deleted successfully',
     };
   }
 
   async search(
-    query: SearchTaskDto,
+    query: SearchRiskDto,
   ) {
     const {
       keyword,
+
       projectId,
-      sprintId,
-      assignedTo,
-      priority,
+
+      taskId,
+
+      level,
+
       status,
+
       page = 1,
+
       limit = 10,
+
       sortBy = 'createdAt',
+
       sortOrder = 'desc',
     } = query;
 
@@ -154,20 +165,25 @@ export class TaskService {
     if (keyword) {
       filter.$or = [
         {
-          taskId: {
+          riskId: {
             $regex: keyword,
+
             $options: 'i',
           },
         },
-        {
-          title: {
-            $regex: keyword,
-            $options: 'i',
-          },
-        },
+
         {
           description: {
             $regex: keyword,
+
+            $options: 'i',
+          },
+        },
+
+        {
+          mitigationPlan: {
+            $regex: keyword,
+
             $options: 'i',
           },
         },
@@ -175,19 +191,17 @@ export class TaskService {
     }
 
     if (projectId) {
-      filter.projectId = projectId;
+      filter.projectId =
+        projectId;
     }
 
-    if (sprintId) {
-      filter.sprintId = sprintId;
+    if (taskId) {
+      filter.taskId =
+        taskId;
     }
 
-    if (assignedTo) {
-      filter.assignedTo = assignedTo;
-    }
-
-    if (priority) {
-      filter.priority = priority;
+    if (level) {
+      filter.level = level;
     }
 
     if (status) {
@@ -201,39 +215,46 @@ export class TaskService {
       Number(limit);
 
     const data =
-      await this.taskModel
+      await this.riskModel
+
         .find(filter)
+
         .populate('projectId')
-        .populate('sprintId')
-        .populate(
-          'assignedTo',
-          '-password',
-        )
+
+        .populate('taskId')
+
         .sort({
           [sortBy]:
             sortOrder === 'asc'
               ? 1
               : -1,
         })
+
         .skip(
           (currentPage - 1) *
             pageSize,
         )
+
         .limit(pageSize);
 
     const total =
-      await this.taskModel.countDocuments(
+      await this.riskModel.countDocuments(
         filter,
       );
 
     return {
       success: true,
+
       total,
+
       page: currentPage,
+
       limit: pageSize,
+
       totalPages: Math.ceil(
         total / pageSize,
       ),
+
       data,
     };
   }
@@ -241,55 +262,38 @@ export class TaskService {
   async findByProject(
     projectId: string,
   ) {
-    return this.taskModel
+    return this.riskModel
+
       .find({
         projectId,
+
         isDeleted: false,
       })
+
       .populate('projectId')
-      .populate('sprintId')
-      .populate(
-        'assignedTo',
-        '-password',
-      )
+
+      .populate('taskId')
+
       .sort({
         createdAt: -1,
       });
   }
 
-  async findBySprint(
-    sprintId: string,
+  async findByTask(
+    taskId: string,
   ) {
-    return this.taskModel
-      .find({
-        sprintId,
-        isDeleted: false,
-      })
-      .populate('projectId')
-      .populate('sprintId')
-      .populate(
-        'assignedTo',
-        '-password',
-      )
-      .sort({
-        createdAt: -1,
-      });
-  }
+    return this.riskModel
 
-  async findByUser(
-    userId: string,
-  ) {
-    return this.taskModel
       .find({
-        assignedTo: userId,
+        taskId,
+
         isDeleted: false,
       })
+
       .populate('projectId')
-      .populate('sprintId')
-      .populate(
-        'assignedTo',
-        '-password',
-      )
+
+      .populate('taskId')
+
       .sort({
         createdAt: -1,
       });
@@ -297,22 +301,25 @@ export class TaskService {
 
   async updateStatus(
     id: string,
+
     status: string,
   ) {
-    const task =
-      await this.taskModel.findById(id);
+    const risk =
+      await this.riskModel.findById(
+        id,
+      );
 
-    if (!task) {
+    if (!risk) {
       throw new NotFoundException(
-        'Task not found',
+        'Risk not found',
       );
     }
 
-    task.status =
-      status as TaskStatus;
+    risk.status =
+      status as RiskStatus;
 
-    await task.save();
+    await risk.save();
 
-    return task;
+    return risk;
   }
 }

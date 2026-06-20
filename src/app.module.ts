@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { ProjectModule } from './project/project.module';
 import { SprintModule } from './sprint/sprint.module';
 import { TaskModule } from './task/task.module';
+import { RiskModule } from './risk/risk.module';
+import { IssueModule } from './issue/issue.module';
 
 
 @Module({
@@ -19,6 +21,8 @@ import { TaskModule } from './task/task.module';
     ProjectModule,
     SprintModule,
     TaskModule,
+    RiskModule,
+    IssueModule,
     ],
   controllers: [AppController],
   providers: [AppService],

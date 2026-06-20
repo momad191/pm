@@ -108,3 +108,33 @@ export class Task {
 
 export const TaskSchema =
   SchemaFactory.createForClass(Task);
+
+
+
+  TaskSchema.index({
+  taskId: 1,
+});
+
+TaskSchema.index({
+  projectId: 1,
+});
+
+TaskSchema.index({
+  sprintId: 1,
+});
+
+TaskSchema.index({
+  assignedTo: 1,
+});
+
+TaskSchema.index({
+  status: 1,
+});
+
+TaskSchema.index({
+  priority: 1,
+});
+
+TaskSchema.index({
+  isDeleted: 1,
+});
