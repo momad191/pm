@@ -10,7 +10,7 @@ import { SprintModule } from './sprint/sprint.module';
 import { TaskModule } from './task/task.module';
 import { RiskModule } from './risk/risk.module';
 import { IssueModule } from './issue/issue.module';
-
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -23,8 +23,9 @@ import { IssueModule } from './issue/issue.module';
     TaskModule,
     RiskModule,
     IssueModule,
-    ],
+    NotificationModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

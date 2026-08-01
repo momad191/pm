@@ -1,18 +1,10 @@
 // sprint/schemas/sprint.schema.ts
 
-import {
-  Prop,
-  Schema,
-  SchemaFactory,
-} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import {
-  Document,
-  Types,
-} from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type SprintDocument =
-  Sprint & Document;
+export type SprintDocument = Sprint & Document;
 
 export enum SprintStatus {
   PLANNED = 'PLANNED',
@@ -93,15 +85,11 @@ export class Sprint {
   isDeleted: boolean;
 }
 
-export const SprintSchema =
-  SchemaFactory.createForClass(
-    Sprint,
-  );
+export const SprintSchema = SchemaFactory.createForClass(Sprint);
 
-
-SprintSchema.index({
-  sprintId: 1,
-});
+// SprintSchema.index({
+//   sprintId: 1,
+// });
 
 SprintSchema.index({
   projectId: 1,
@@ -114,5 +102,3 @@ SprintSchema.index({
 SprintSchema.index({
   isDeleted: 1,
 });
-
-

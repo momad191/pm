@@ -1,16 +1,8 @@
-import {
-  Prop,
-  Schema,
-  SchemaFactory,
-} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import {
-  Document,
-  Types,
-} from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type RiskDocument =
-  Risk & Document;
+export type RiskDocument = Risk & Document;
 
 export enum RiskLevel {
   LOW = 'LOW',
@@ -86,14 +78,11 @@ export class Risk {
   isDeleted: boolean;
 }
 
-export const RiskSchema =
-  SchemaFactory.createForClass(
-    Risk,
-  );
+export const RiskSchema = SchemaFactory.createForClass(Risk);
 
-RiskSchema.index({
-  riskId: 1,
-});
+// RiskSchema.index({
+//   riskId: 1,
+// });
 
 RiskSchema.index({
   projectId: 1,

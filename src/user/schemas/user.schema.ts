@@ -1,8 +1,4 @@
-import {
-  Prop,
-  Schema,
-  SchemaFactory,
-} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Document } from 'mongoose';
 
@@ -42,7 +38,6 @@ export class User {
   @Prop({
     required: true,
     select: false,
-
   })
   password: string;
 
@@ -63,5 +58,4 @@ export class User {
   isDeleted: boolean;
 }
 
-export const UserSchema =
-  SchemaFactory.createForClass(User);
+export const UserSchema = SchemaFactory.createForClass(User);

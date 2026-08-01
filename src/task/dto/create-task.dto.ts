@@ -7,12 +7,10 @@ import {
   IsDateString,
 } from 'class-validator';
 
-import {
-  TaskPriority,
-  TaskStatus,
-} from '../schemas/task.schema';
+import { TaskPriority, TaskStatus } from '../schemas/task.schema';
 
 export class CreateTaskDto {
+  @IsOptional()
   @IsString()
   taskId: string;
 

@@ -17,9 +17,7 @@ import { SearchTaskDto } from './dto/search-task.dto';
 
 @Controller('task')
 export class TaskController {
-  constructor(
-    private readonly taskService: TaskService,
-  ) {}
+  constructor(private readonly taskService: TaskService) {}
 
   /**
    * POST /task
@@ -29,9 +27,7 @@ export class TaskController {
     @Body()
     createTaskDto: CreateTaskDto,
   ) {
-    return this.taskService.create(
-      createTaskDto,
-    );
+    return this.taskService.create(createTaskDto);
   }
 
   /**
@@ -50,9 +46,7 @@ export class TaskController {
     @Query()
     query: SearchTaskDto,
   ) {
-    return this.taskService.search(
-      query,
-    );
+    return this.taskService.search(query);
   }
 
   /**
@@ -63,9 +57,7 @@ export class TaskController {
     @Param('projectId')
     projectId: string,
   ) {
-    return this.taskService.findByProject(
-      projectId,
-    );
+    return this.taskService.findByProject(projectId);
   }
 
   /**
@@ -76,9 +68,7 @@ export class TaskController {
     @Param('sprintId')
     sprintId: string,
   ) {
-    return this.taskService.findBySprint(
-      sprintId,
-    );
+    return this.taskService.findBySprint(sprintId);
   }
 
   /**
@@ -89,9 +79,7 @@ export class TaskController {
     @Param('userId')
     userId: string,
   ) {
-    return this.taskService.findByUser(
-      userId,
-    );
+    return this.taskService.findByUser(userId);
   }
 
   /**
@@ -116,10 +104,7 @@ export class TaskController {
     @Body()
     updateTaskDto: UpdateTaskDto,
   ) {
-    return this.taskService.update(
-      id,
-      updateTaskDto,
-    );
+    return this.taskService.update(id, updateTaskDto);
   }
 
   /**
@@ -135,10 +120,7 @@ export class TaskController {
       status: string;
     },
   ) {
-    return this.taskService.updateStatus(
-      id,
-      body.status,
-    );
+    return this.taskService.updateStatus(id, body.status);
   }
 
   /**

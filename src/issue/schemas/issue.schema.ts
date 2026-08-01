@@ -1,162 +1,139 @@
-import {
-    Prop,
-    Schema,
-    SchemaFactory,
-} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import {
-    Document,
-    Types,
-} from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type IssueDocument =
-    Issue & Document;
+export type IssueDocument = Issue & Document;
 
 export enum IssueStatus {
-    OPEN = 'OPEN',
+  OPEN = 'OPEN',
 
-    IN_PROGRESS = 'IN_PROGRESS',
+  IN_PROGRESS = 'IN_PROGRESS',
 
-    RESOLVED = 'RESOLVED',
+  RESOLVED = 'RESOLVED',
 
-    CLOSED = 'CLOSED',
+  CLOSED = 'CLOSED',
 }
 
-
 export enum IssueSeverity {
-    LOW = 'LOW',
+  LOW = 'LOW',
 
-    MEDIUM = 'MEDIUM',
+  MEDIUM = 'MEDIUM',
 
-    HIGH = 'HIGH',
+  HIGH = 'HIGH',
 
-    CRITICAL = 'CRITICAL',
+  CRITICAL = 'CRITICAL',
 }
 
 @Schema({
-    timestamps: true,
+  timestamps: true,
 })
 export class Issue {
-    @Prop({
-        required: true,
-        unique: true,
-    })
-    issueId: string;
+  @Prop({
+    required: true,
+    unique: true,
+  })
+  issueId: string;
 
-    @Prop({
-        type: Types.ObjectId,
+  @Prop({
+    type: Types.ObjectId,
 
-        ref: 'Project',
+    ref: 'Project',
 
-        required: true,
-    })
-    projectId: Types.ObjectId;
+    required: true,
+  })
+  projectId: Types.ObjectId;
 
-    @Prop({
-        type: Types.ObjectId,
+  @Prop({
+    type: Types.ObjectId,
 
-        ref: 'Task',
+    ref: 'Task',
 
-        required: true,
-    })
-    taskId: Types.ObjectId;
+    required: true,
+  })
+  taskId: Types.ObjectId;
 
-    @Prop({
-        enum: IssueStatus,
+  @Prop({
+    enum: IssueStatus,
 
-        default: IssueStatus.OPEN,
-    })
-    status: IssueStatus;
+    default: IssueStatus.OPEN,
+  })
+  status: IssueStatus;
 
-    @Prop({
-        required: true,
-    })
-    description: string;
+  @Prop({
+    required: true,
+  })
+  description: string;
 
-    @Prop({
-        type: Types.ObjectId,
+  @Prop({
+    type: Types.ObjectId,
 
-        ref: 'User',
+    ref: 'User',
 
-        required: true,
-    })
-    assignedTo: Types.ObjectId;
+    required: true,
+  })
+  assignedTo: Types.ObjectId;
 
+  @Prop({
+    type: Types.ObjectId,
 
+    ref: 'User',
 
+    required: true,
+  })
+  reportedBy: Types.ObjectId;
 
-    @Prop({
-        type: Types.ObjectId,
+  @Prop()
+  resolvedAt: Date;
 
-        ref: 'User',
+  @Prop()
+  closedAt: Date;
 
-        required: true,
-    })
-    reportedBy: Types.ObjectId;
+  @Prop()
+  resolutionNotes: string;
 
+  @Prop({
+    enum: IssueSeverity,
 
-    @Prop()
-    resolvedAt: Date;
+    default: IssueSeverity.MEDIUM,
+  })
+  severity: IssueSeverity;
 
-
-    @Prop()
-    closedAt: Date;
-
-
-    @Prop()
-    resolutionNotes: string;
-
-
-    @Prop({
-        enum: IssueSeverity,
-
-        default: IssueSeverity.MEDIUM,
-    })
-    severity: IssueSeverity;
-
-
-    @Prop({
-        default: false,
-    })
-    isDeleted: boolean;
-
-
+  @Prop({
+    default: false,
+  })
+  isDeleted: boolean;
 }
 
-export const IssueSchema =
-    SchemaFactory.createForClass(
-        Issue,
-    );
+export const IssueSchema = SchemaFactory.createForClass(Issue);
+
+// IssueSchema.index({
+//   issueId: 1,
+// });
 
 IssueSchema.index({
-    issueId: 1,
+  projectId: 1,
 });
 
 IssueSchema.index({
-    projectId: 1,
+  taskId: 1,
 });
 
 IssueSchema.index({
-    taskId: 1,
+  assignedTo: 1,
 });
 
 IssueSchema.index({
-    assignedTo: 1,
+  status: 1,
 });
 
 IssueSchema.index({
-    status: 1,
+  reportedBy: 1,
 });
 
 IssueSchema.index({
-    reportedBy: 1,
+  severity: 1,
 });
 
 IssueSchema.index({
-    severity: 1,
-});
-
-
-IssueSchema.index({
-    isDeleted: 1,
+  isDeleted: 1,
 });

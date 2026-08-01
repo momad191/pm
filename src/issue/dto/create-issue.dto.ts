@@ -3,16 +3,12 @@ import {
   IsMongoId,
   IsEnum,
   IsOptional,
-  IsDateString
+  IsDateString,
 } from 'class-validator';
 
-import {
-  IssueStatus,
-} from '../schemas/issue.schema';
+import { IssueStatus } from '../schemas/issue.schema';
 
 import { IssueSeverity } from '../schemas/issue.schema';
-
-
 
 export class CreateIssueDto {
   @IsString()
@@ -34,29 +30,22 @@ export class CreateIssueDto {
   @IsEnum(IssueStatus)
   status?: IssueStatus;
 
-
   @IsMongoId()
-reportedBy: string;
+  reportedBy: string;
 
+  @IsOptional()
+  @IsDateString()
+  resolvedAt?: Date;
 
-@IsOptional()
-@IsDateString()
-resolvedAt?: Date;
+  @IsOptional()
+  @IsDateString()
+  closedAt?: Date;
 
+  @IsOptional()
+  @IsString()
+  resolutionNotes?: string;
 
-@IsOptional()
-@IsDateString()
-closedAt?: Date;
-
-
-@IsOptional()
-@IsString()
-resolutionNotes?: string;
-
-
-@IsOptional()
-@IsEnum(IssueSeverity)
-severity?: IssueSeverity;
-
-
+  @IsOptional()
+  @IsEnum(IssueSeverity)
+  severity?: IssueSeverity;
 }

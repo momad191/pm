@@ -1,15 +1,10 @@
-import {
-  IsString,
-  IsOptional,
-  IsEnum,
-  IsNumber,
-} from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber } from 'class-validator';
 
 import { ProjectStatus } from '../schemas/project.schema';
 
 export class CreateProjectDto {
-//   @IsString()
-//   projectId: string;
+  // @IsString()
+  // projectId: string;
 
   @IsString()
   name: string;
@@ -38,4 +33,12 @@ export class CreateProjectDto {
   @IsOptional()
   @IsNumber()
   completionPercentage?: number;
+
+  @IsOptional()
+  @IsString()
+  month: string;
+
+  @IsOptional()
+  @IsString()
+  year: string;
 }

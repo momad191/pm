@@ -1,18 +1,10 @@
 // task/schemas/task.schema.ts
 
-import {
-  Prop,
-  Schema,
-  SchemaFactory,
-} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import {
-  Document,
-  Types,
-} from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type TaskDocument =
-  Task & Document;
+export type TaskDocument = Task & Document;
 
 export enum TaskStatus {
   BACKLOG = 'BACKLOG',
@@ -36,7 +28,7 @@ export enum TaskPriority {
 })
 export class Task {
   @Prop({
-    required: true,
+    required: false,
     unique: true,
   })
   taskId: string;
@@ -106,14 +98,11 @@ export class Task {
   isDeleted: boolean;
 }
 
-export const TaskSchema =
-  SchemaFactory.createForClass(Task);
+export const TaskSchema = SchemaFactory.createForClass(Task);
 
-
-
-  TaskSchema.index({
-  taskId: 1,
-});
+// TaskSchema.index({
+//   taskId: 1,
+// });
 
 TaskSchema.index({
   projectId: 1,

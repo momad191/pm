@@ -17,17 +17,11 @@ import { SearchProjectDto } from './dto/search-project.dto';
 
 @Controller('project')
 export class ProjectController {
-  constructor(
-    private readonly projectService: ProjectService,
-  ) {}
+  constructor(private readonly projectService: ProjectService) {}
 
   @Post()
-  create(
-    @Body() dto: CreateProjectDto,
-  ) {
-    return this.projectService.create(
-      dto,
-    );
+  create(@Body() dto: CreateProjectDto) {
+    return this.projectService.create(dto);
   }
 
   @Get()
@@ -36,36 +30,22 @@ export class ProjectController {
   }
 
   @Get('search')
-  search(
-    @Query() query: SearchProjectDto,
-  ) {
-    return this.projectService.search(
-      query,
-    );
+  search(@Query() query: SearchProjectDto) {
+    return this.projectService.search(query);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.projectService.findOne(
-      id,
-    );
+    return this.projectService.findOne(id);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateProjectDto,
-  ) {
-    return this.projectService.update(
-      id,
-      dto,
-    );
+  update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
+    return this.projectService.update(id, dto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.projectService.remove(
-      id,
-    );
+    return this.projectService.remove(id);
   }
 }
