@@ -11,6 +11,7 @@ import { TaskModule } from './task/task.module';
 import { RiskModule } from './risk/risk.module';
 import { IssueModule } from './issue/issue.module';
 import { NotificationModule } from './notification/notification.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { NotificationModule } from './notification/notification.module';
     RiskModule,
     IssueModule,
     NotificationModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

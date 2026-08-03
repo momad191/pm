@@ -275,4 +275,295 @@ export class ProjectService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
+
+  async dashboard() {
+
+    const result = await this.projectModel.aggregate([
+
+        {
+            $match:{
+                isDeleted:false
+            }
+        },
+
+        {
+            $facet:{
+
+                //----------------------------------
+                // Summary
+                //----------------------------------
+
+                summary:[
+
+                    {
+                        $group:{
+
+                            _id:null,
+
+                            totalProjects:{
+                                $sum:1
+                            },
+
+                            activeProjects:{
+                                $sum:{
+                                    $cond:[
+                                        {
+                                            $eq:["$status","ACTIVE"]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+
+                            completedProjects:{
+                                $sum:{
+                                    $cond:[
+                                        {
+                                            $eq:["$status","COMPLETED"]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+
+                            planningProjects:{
+                                $sum:{
+                                    $cond:[
+                                        {
+                                            $eq:["$status","PLANNING"]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+
+                            onHoldProjects:{
+                                $sum:{
+                                    $cond:[
+                                        {
+                                            $eq:["$status","ON_HOLD"]
+                                        },
+                                        1,
+                                        0
+                                    ]
+                                }
+                            },
+
+                            completionAverage:{
+                                $avg:"$completionPercentage"
+                            }
+
+                        }
+                    }
+
+                ],
+
+                //----------------------------------
+                // Status
+                //----------------------------------
+
+                statusChart:[
+
+                    {
+                        $group:{
+                            _id:"$status",
+                            count:{
+                                $sum:1
+                            }
+                        }
+                    },
+
+                    {
+                        $project:{
+                            _id:0,
+                            status:"$_id",
+                            count:1
+                        }
+                    }
+
+                ],
+
+                //----------------------------------
+                // Departments
+                //----------------------------------
+
+                departmentChart:[
+
+                    {
+                        $group:{
+                            _id:"$department",
+                            count:{
+                                $sum:1
+                            }
+                        }
+                    },
+
+                    {
+                        $sort:{
+                            count:-1
+                        }
+                    },
+
+                    {
+                        $project:{
+                            _id:0,
+                            department:"$_id",
+                            count:1
+                        }
+                    }
+
+                ],
+
+                //----------------------------------
+                // Monthly
+                //----------------------------------
+
+                monthlyProjects:[
+
+                    {
+                        $group:{
+                            _id:"$month",
+                            count:{
+                                $sum:1
+                            }
+                        }
+                    },
+
+                    {
+                        $sort:{
+                            _id:1
+                        }
+                    },
+
+                    {
+                        $project:{
+                            _id:0,
+                            month:"$_id",
+                            count:1
+                        }
+                    }
+
+                ],
+
+                //----------------------------------
+                // Top Managers
+                //----------------------------------
+
+                topManagers:[
+
+                    {
+                        $group:{
+
+                            _id:"$managerId",
+
+                            projects:{
+                                $sum:1
+                            },
+
+                            averageCompletion:{
+                                $avg:"$completionPercentage"
+                            }
+
+                        }
+                    },
+
+                    {
+                        $sort:{
+                            projects:-1
+                        }
+                    },
+
+                    {
+                        $limit:10
+                    },
+
+                    {
+                        $project:{
+                            _id:0,
+                            managerId:"$_id",
+                            projects:1,
+                            averageCompletion:{
+                                $round:[
+                                    "$averageCompletion",
+                                    2
+                                ]
+                            }
+                        }
+                    }
+
+                ],
+
+                //----------------------------------
+                // Completion Distribution
+                //----------------------------------
+
+                completionDistribution:[
+
+                    {
+                        $bucket:{
+
+                            groupBy:"$completionPercentage",
+
+                            boundaries:[
+                                0,
+                                25,
+                                50,
+                                75,
+                                101
+                            ],
+
+                            default:"Other",
+
+                            output:{
+                                count:{
+                                    $sum:1
+                                }
+                            }
+
+                        }
+                    }
+
+                ]
+
+            }
+
+        }
+
+    ]);
+
+    return{
+
+        summary:result[0].summary[0] ?? {},
+
+        statusChart:result[0].statusChart,
+
+        departmentChart:result[0].departmentChart,
+
+        monthlyProjects:result[0].monthlyProjects,
+
+        completionDistribution:result[0].completionDistribution.map(x=>({
+
+            range:
+                x._id===0 ? "0-25" :
+                x._id===25 ? "26-50" :
+                x._id===50 ? "51-75" :
+                x._id===75 ? "76-100" :
+                "Other",
+
+            count:x.count
+
+        })),
+
+        topManagers:result[0].topManagers
+
+    };
+
 }
+
+
+}
+ 
