@@ -1,16 +1,17 @@
-
 import {
   Injectable,
   NotFoundException,
-  ConflictException,
+  // ConflictException,
 } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
 
 import { Model, Types } from 'mongoose';
 
-
-import { Notification, NotificationDocument } from 'src/notification/schemas/notification.schema';
+import {
+  Notification,
+  NotificationDocument,
+} from 'src/notification/schemas/notification.schema';
 
 import { Project, ProjectDocument } from 'src/project/schemas/project.schema';
 import { Sprint, SprintDocument } from 'src/sprint/schemas/sprint.schema';
@@ -19,14 +20,9 @@ import { Risk, RiskDocument } from 'src/risk/schemas/risk.schema';
 import { Issue, IssueDocument } from 'src/issue/schemas/issue.schema';
 import { User, UserDocument } from 'src/user/schemas/user.schema';
 
-
-
-
 @Injectable()
 export class DashboardService {
-
   constructor(
-
     @InjectModel(Project.name)
     private readonly projectModel: Model<ProjectDocument>,
 
@@ -46,9 +42,7 @@ export class DashboardService {
     private readonly notificationModel: Model<NotificationDocument>,
 
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-
-  ) { }
-
+  ) {}
 
   // =====================================================
   // Dashboard Overview
@@ -56,7 +50,6 @@ export class DashboardService {
   // =====================================================
 
   async getOverview() {
-
     const projects = this.projectModel.aggregate([
       {
         $match: {
@@ -127,9 +120,6 @@ export class DashboardService {
     ]);
     // ======================end ===============================
 
-
-
-
     // =====================================================
     //Sprint Aggregation
     // =====================================================
@@ -187,8 +177,6 @@ export class DashboardService {
       },
     ]);
     // ======================end ===============================
-
-
 
     // =====================================================
     //Task Aggregation
@@ -251,8 +239,6 @@ export class DashboardService {
     ]);
     // ======================end ===============================
 
-
-
     // =====================================================
     //Risk Aggregation
     // =====================================================
@@ -292,8 +278,6 @@ export class DashboardService {
       },
     ]);
     // ======================end ===============================
-
-
 
     // =====================================================
     //Issue Aggregation
@@ -341,7 +325,6 @@ export class DashboardService {
     ]);
     // ======================end ===============================
 
-
     // =====================================================
     //Notification Aggregation
     // =====================================================
@@ -370,9 +353,7 @@ export class DashboardService {
     ]);
     // ======================end ===============================
 
-
     // Execute all aggregations concurrently and format the response
-
 
     const [
       projectData,
@@ -398,21 +379,14 @@ export class DashboardService {
       issues: issueData[0] ?? {},
       notifications: notificationData[0] ?? {},
     };
-
   }
 
-
-
-
-
   async getProjectHealth() {
-
     const result = await this.projectModel.aggregate([
-
       {
         $match: {
-          isDeleted: false
-        }
+          isDeleted: false,
+        },
       },
 
       {
@@ -420,38 +394,34 @@ export class DashboardService {
           summary: [
             {
               $group: {
-
                 _id: null,
 
                 totalProjects: {
-                  $sum: 1
+                  $sum: 1,
                 },
 
                 completedProjects: {
                   $sum: {
                     $cond: [
                       {
-                        $eq: ["$status", "COMPLETED"]
+                        $eq: ['$status', 'COMPLETED'],
                       },
                       1,
-                      0
-                    ]
-                  }
+                      0,
+                    ],
+                  },
                 },
 
                 healthyProjects: {
                   $sum: {
                     $cond: [
                       {
-                        $gte: [
-                          "$completionPercentage",
-                          75
-                        ]
+                        $gte: ['$completionPercentage', 75],
                       },
                       1,
-                      0
-                    ]
-                  }
+                      0,
+                    ],
+                  },
                 },
 
                 atRiskProjects: {
@@ -460,23 +430,17 @@ export class DashboardService {
                       {
                         $and: [
                           {
-                            $gte: [
-                              "$completionPercentage",
-                              25
-                            ]
+                            $gte: ['$completionPercentage', 25],
                           },
                           {
-                            $lt: [
-                              "$completionPercentage",
-                              75
-                            ]
-                          }
-                        ]
+                            $lt: ['$completionPercentage', 75],
+                          },
+                        ],
                       },
                       1,
-                      0
-                    ]
-                  }
+                      0,
+                    ],
+                  },
                 },
 
                 overdueProjects: {
@@ -485,162 +449,116 @@ export class DashboardService {
                       {
                         $and: [
                           {
-                            $lt: [
-                              "$endDate",
-                              new Date()
-                            ]
+                            $lt: ['$endDate', new Date()],
                           },
                           {
-                            $ne: [
-                              "$status",
-                              "COMPLETED"
-                            ]
-                          }
-                        ]
+                            $ne: ['$status', 'COMPLETED'],
+                          },
+                        ],
                       },
                       1,
-                      0
-                    ]
-                  }
+                      0,
+                    ],
+                  },
                 },
 
                 averageCompletion: {
-                  $avg: "$completionPercentage"
-                }
-
-              }
-            }
+                  $avg: '$completionPercentage',
+                },
+              },
+            },
           ],
 
           statusDistribution: [
-
             {
               $group: {
-
-                _id: "$status",
+                _id: '$status',
 
                 count: {
-                  $sum: 1
-                }
-
-              }
+                  $sum: 1,
+                },
+              },
             },
 
             {
               $project: {
                 _id: 0,
-                status: "$_id",
-                count: 1
-              }
-            }
-
+                status: '$_id',
+                count: 1,
+              },
+            },
           ],
 
           completionRanges: [
-
             {
               $bucket: {
+                groupBy: '$completionPercentage',
 
-                groupBy: "$completionPercentage",
+                boundaries: [0, 25, 50, 75, 101],
 
-                boundaries: [
-                  0,
-                  25,
-                  50,
-                  75,
-                  101
-                ],
-
-                default: "Other",
+                default: 'Other',
 
                 output: {
-
                   count: {
-                    $sum: 1
-                  }
-
-                }
-
-              }
-
-            }
-
+                    $sum: 1,
+                  },
+                },
+              },
+            },
           ],
 
-
           monthlyProjects: [
-
             {
               $group: {
-
-                _id: "$month",
+                _id: '$month',
 
                 count: {
-                  $sum: 1
-                }
-
-              }
-
+                  $sum: 1,
+                },
+              },
             },
 
             {
               $sort: {
-                _id: 1
-              }
+                _id: 1,
+              },
             },
 
             {
               $project: {
                 _id: 0,
-                month: "$_id",
-                count: 1
-              }
-            }
-
-          ]
-
-        }
-      }
+                month: '$_id',
+                count: 1,
+              },
+            },
+          ],
+        },
+      },
     ]);
 
-
     return {
+      summary: result[0].summary[0] ?? {},
 
-      summary:
-        result[0].summary[0] ??
-        {},
+      statusDistribution: result[0].statusDistribution,
 
-      statusDistribution:
-        result[0].statusDistribution,
+      completionRanges: result[0].completionRanges.map((item) => ({
+        range:
+          item._id === 0
+            ? '0-25'
+            : item._id === 25
+              ? '26-50'
+              : item._id === 50
+                ? '51-75'
+                : item._id === 75
+                  ? '76-100'
+                  : 'Other',
 
-      completionRanges:
-        result[0].completionRanges.map(item => ({
+        count: item.count,
+      })),
 
-          range:
-            item._id === 0
-              ? "0-25"
-              : item._id === 25
-                ? "26-50"
-                : item._id === 50
-                  ? "51-75"
-                  : item._id === 75
-                    ? "76-100"
-                    : "Other",
-
-          count: item.count
-
-        })),
-
-      monthlyProjects:
-        result[0].monthlyProjects
-
+      monthlyProjects: result[0].monthlyProjects,
     };
-
-
   }
-
-
-
 
   async getWorkload() {
     const now = new Date();
@@ -770,10 +688,7 @@ export class DashboardService {
                   {
                     $multiply: [
                       {
-                        $divide: [
-                          '$completedTasks',
-                          '$totalTasks',
-                        ],
+                        $divide: ['$completedTasks', '$totalTasks'],
                       },
                       100,
                     ],
@@ -823,10 +738,7 @@ export class DashboardService {
                 input: '$tasks',
                 as: 'task',
                 cond: {
-                  $eq: [
-                    '$$task.status',
-                    'DONE',
-                  ],
+                  $eq: ['$$task.status', 'DONE'],
                 },
               },
             },
@@ -847,10 +759,7 @@ export class DashboardService {
                   {
                     $multiply: [
                       {
-                        $divide: [
-                          '$completedTasks',
-                          '$totalTasks',
-                        ],
+                        $divide: ['$completedTasks', '$totalTasks'],
                       },
                       100,
                     ],
@@ -956,10 +865,7 @@ export class DashboardService {
                   {
                     $multiply: [
                       {
-                        $divide: [
-                          '$active',
-                          '$assigned',
-                        ],
+                        $divide: ['$active', '$assigned'],
                       },
                       100,
                     ],
@@ -1052,16 +958,8 @@ export class DashboardService {
     };
   }
 
-
-
   async getExecutiveDashboard() {
-    const [
-      projects,
-      tasks,
-      sprints,
-      risks,
-      issues,
-    ] = await Promise.all([
+    const [projects, tasks, sprints, risks, issues] = await Promise.all([
       this.projectModel.aggregate([
         {
           $group: {
@@ -1073,21 +971,13 @@ export class DashboardService {
 
             activeProjects: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'ACTIVE'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'ACTIVE'] }, 1, 0],
               },
             },
 
             completedProjects: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'COMPLETED'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0],
               },
             },
 
@@ -1109,21 +999,13 @@ export class DashboardService {
 
             completedTasks: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'DONE'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'DONE'] }, 1, 0],
               },
             },
 
             inProgressTasks: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'IN_PROGRESS'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'IN_PROGRESS'] }, 1, 0],
               },
             },
 
@@ -1133,16 +1015,10 @@ export class DashboardService {
                   {
                     $and: [
                       {
-                        $lt: [
-                          '$dueDate',
-                          new Date(),
-                        ],
+                        $lt: ['$dueDate', new Date()],
                       },
                       {
-                        $ne: [
-                          '$status',
-                          'DONE',
-                        ],
+                        $ne: ['$status', 'DONE'],
                       },
                     ],
                   },
@@ -1166,21 +1042,13 @@ export class DashboardService {
 
             activeSprints: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'ACTIVE'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'ACTIVE'] }, 1, 0],
               },
             },
 
             completedSprints: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'COMPLETED'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0],
               },
             },
           },
@@ -1200,10 +1068,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      '$level',
-                      'HIGH',
-                    ],
+                    $eq: ['$level', 'HIGH'],
                   },
                   1,
                   0,
@@ -1227,10 +1092,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      '$status',
-                      'OPEN',
-                    ],
+                    $eq: ['$status', 'OPEN'],
                   },
                   1,
                   0,
@@ -1242,10 +1104,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      '$status',
-                      'RESOLVED',
-                    ],
+                    $eq: ['$status', 'RESOLVED'],
                   },
                   1,
                   0,
@@ -1266,34 +1125,20 @@ export class DashboardService {
     const projectSuccessRate =
       project.totalProjects > 0
         ? Number(
-          (
-            (project.completedProjects /
-              project.totalProjects) *
-            100
-          ).toFixed(2),
-        )
+            ((project.completedProjects / project.totalProjects) * 100).toFixed(
+              2,
+            ),
+          )
         : 0;
 
     const taskCompletionRate =
       task.totalTasks > 0
-        ? Number(
-          (
-            (task.completedTasks /
-              task.totalTasks) *
-            100
-          ).toFixed(2),
-        )
+        ? Number(((task.completedTasks / task.totalTasks) * 100).toFixed(2))
         : 0;
 
     const issueResolutionRate =
       issue.totalIssues > 0
-        ? Number(
-          (
-            (issue.resolvedIssues /
-              issue.totalIssues) *
-            100
-          ).toFixed(2),
-        )
+        ? Number(((issue.resolvedIssues / issue.totalIssues) * 100).toFixed(2))
         : 0;
 
     return {
@@ -1302,85 +1147,57 @@ export class DashboardService {
 
         active: project.activeProjects || 0,
 
-        completed:
-          project.completedProjects || 0,
+        completed: project.completedProjects || 0,
 
-        successRate:
-          projectSuccessRate,
+        successRate: projectSuccessRate,
 
-        averageCompletion:
-          Number(
-            (
-              project.averageCompletion || 0
-            ).toFixed(2),
-          ),
+        averageCompletion: Number((project.averageCompletion || 0).toFixed(2)),
       },
 
       sprints: {
-        total:
-          sprint.totalSprints || 0,
+        total: sprint.totalSprints || 0,
 
-        active:
-          sprint.activeSprints || 0,
+        active: sprint.activeSprints || 0,
 
-        completed:
-          sprint.completedSprints || 0,
+        completed: sprint.completedSprints || 0,
       },
 
       tasks: {
-        total:
-          task.totalTasks || 0,
+        total: task.totalTasks || 0,
 
-        completed:
-          task.completedTasks || 0,
+        completed: task.completedTasks || 0,
 
-        inProgress:
-          task.inProgressTasks || 0,
+        inProgress: task.inProgressTasks || 0,
 
-        overdue:
-          task.overdueTasks || 0,
+        overdue: task.overdueTasks || 0,
 
-        completionRate:
-          taskCompletionRate,
+        completionRate: taskCompletionRate,
       },
 
       risks: {
-        total:
-          risk.totalRisks || 0,
+        total: risk.totalRisks || 0,
 
-        high:
-          risk.highRisks || 0,
+        high: risk.highRisks || 0,
       },
 
       issues: {
-        total:
-          issue.totalIssues || 0,
+        total: issue.totalIssues || 0,
 
-        open:
-          issue.openIssues || 0,
+        open: issue.openIssues || 0,
 
-        resolved:
-          issue.resolvedIssues || 0,
+        resolved: issue.resolvedIssues || 0,
 
-        resolutionRate:
-          issueResolutionRate,
+        resolutionRate: issueResolutionRate,
       },
 
       executiveScore: Number(
         (
-          (
-            projectSuccessRate +
-            taskCompletionRate +
-            issueResolutionRate
-          ) / 3
+          (projectSuccessRate + taskCompletionRate + issueResolutionRate) /
+          3
         ).toFixed(2),
       ),
     };
   }
-
-
-
-
 
   async getCharts() {
     const currentYear = new Date().getFullYear().toString();
@@ -1574,8 +1391,6 @@ export class DashboardService {
     };
   }
 
-
-
   async getProjectDashboard(projectId: string) {
     const [
       project,
@@ -1610,10 +1425,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      '$status',
-                      'ACTIVE',
-                    ],
+                    $eq: ['$status', 'ACTIVE'],
                   },
                   1,
                   0,
@@ -1625,10 +1437,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      '$status',
-                      'COMPLETED',
-                    ],
+                    $eq: ['$status', 'COMPLETED'],
                   },
                   1,
                   0,
@@ -1723,34 +1532,25 @@ export class DashboardService {
       //----------------------------------------
 
       this.sprintModel.findOne({
-        projectId: new (require('mongoose')).Types.ObjectId(projectId),
+        projectId: new (require('mongoose').Types.ObjectId)(projectId),
 
         status: 'ACTIVE' as any,
       }),
     ]);
 
     if (!project) {
-      throw new NotFoundException(
-        'Project not found',
-      );
+      throw new NotFoundException('Project not found');
     }
 
     //----------------------------------------
     // Calculate Performance Score
     //----------------------------------------
 
-    const completion =
-      project.completionPercentage || 0;
+    const completion = project.completionPercentage || 0;
 
-    const highRisks =
-      riskSummary.find(
-        (x) => x._id === 'HIGH',
-      )?.count || 0;
+    const highRisks = riskSummary.find((x) => x._id === 'HIGH')?.count || 0;
 
-    const openIssues =
-      issueSummary.find(
-        (x) => x._id === 'OPEN',
-      )?.count || 0;
+    const openIssues = issueSummary.find((x) => x._id === 'OPEN')?.count || 0;
 
     let score = completion;
 
@@ -1760,42 +1560,32 @@ export class DashboardService {
 
     score -= overdueTasks * 2;
 
-    score = Math.max(
-      0,
-      Math.min(100, score),
-    );
+    score = Math.max(0, Math.min(100, score));
 
     return {
       project,
 
       progress: {
-        completion:
-          project.completionPercentage,
+        completion: project.completionPercentage,
       },
 
       timeline: {
-        startDate:
-          project.startDate,
+        startDate: project.startDate,
 
-        endDate:
-          project.endDate,
+        endDate: project.endDate,
       },
 
-      sprints:
-        sprintSummary[0] || {
-          total: 0,
-          active: 0,
-          completed: 0,
-        },
+      sprints: sprintSummary[0] || {
+        total: 0,
+        active: 0,
+        completed: 0,
+      },
 
-      taskStatus:
-        taskSummary,
+      taskStatus: taskSummary,
 
-      risks:
-        riskSummary,
+      risks: riskSummary,
 
-      issues:
-        issueSummary,
+      issues: issueSummary,
 
       overdueTasks,
 
@@ -1804,8 +1594,6 @@ export class DashboardService {
       performanceScore: score,
     };
   }
-
-
 
   async getManagerDashboard(managerId: string) {
     const [
@@ -1836,41 +1624,25 @@ export class DashboardService {
 
             activeProjects: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'ACTIVE'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'ACTIVE'] }, 1, 0],
               },
             },
 
             completedProjects: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'COMPLETED'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0],
               },
             },
 
             planningProjects: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'PLANNING'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'PLANNING'] }, 1, 0],
               },
             },
 
             onHoldProjects: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'ON_HOLD'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'ON_HOLD'] }, 1, 0],
               },
             },
 
@@ -1915,21 +1687,13 @@ export class DashboardService {
 
             activeSprints: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'ACTIVE'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'ACTIVE'] }, 1, 0],
               },
             },
 
             completedSprints: {
               $sum: {
-                $cond: [
-                  { $eq: ['$status', 'COMPLETED'] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0],
               },
             },
           },
@@ -2054,72 +1818,49 @@ export class DashboardService {
     // Calculate KPIs
     //----------------------------------------
 
-    const highRisks =
-      riskSummary.find(r => r._id === 'HIGH')?.count || 0;
+    const highRisks = riskSummary.find((r) => r._id === 'HIGH')?.count || 0;
 
-    const openIssues =
-      issueSummary.find(i => i._id === 'OPEN')?.count || 0;
+    const openIssues = issueSummary.find((i) => i._id === 'OPEN')?.count || 0;
 
     const completedTasks =
-      taskSummary.find(t => t._id === 'DONE')?.count || 0;
+      taskSummary.find((t) => t._id === 'DONE')?.count || 0;
 
-    const totalTasks =
-      taskSummary.reduce(
-        (sum, t) => sum + t.count,
-        0,
-      );
+    const totalTasks = taskSummary.reduce((sum, t) => sum + t.count, 0);
 
     const taskCompletion =
-      totalTasks > 0
-        ? (completedTasks / totalTasks) * 100
-        : 0;
+      totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
     let performance =
-      (project.averageCompletion || 0) * 0.5 +
-      taskCompletion * 0.5;
+      (project.averageCompletion || 0) * 0.5 + taskCompletion * 0.5;
 
     performance -= highRisks * 2;
 
     performance -= openIssues;
 
-    performance = Math.max(
-      0,
-      Math.min(100, performance),
-    );
+    performance = Math.max(0, Math.min(100, performance));
 
     return {
       managerId,
 
       projects: {
-        total:
-          project.totalProjects || 0,
+        total: project.totalProjects || 0,
 
-        active:
-          project.activeProjects || 0,
+        active: project.activeProjects || 0,
 
-        completed:
-          project.completedProjects || 0,
+        completed: project.completedProjects || 0,
 
-        planning:
-          project.planningProjects || 0,
+        planning: project.planningProjects || 0,
 
-        onHold:
-          project.onHoldProjects || 0,
+        onHold: project.onHoldProjects || 0,
 
-        averageCompletion:
-          Number(
-            (
-              project.averageCompletion || 0
-            ).toFixed(2),
-          ),
+        averageCompletion: Number((project.averageCompletion || 0).toFixed(2)),
       },
 
-      sprints:
-        sprintSummary[0] || {
-          totalSprints: 0,
-          activeSprints: 0,
-          completedSprints: 0,
-        },
+      sprints: sprintSummary[0] || {
+        totalSprints: 0,
+        activeSprints: 0,
+        completedSprints: 0,
+      },
 
       taskStatus: taskSummary,
 
@@ -2127,15 +1868,11 @@ export class DashboardService {
 
       issues: issueSummary,
 
-      performanceScore: Number(
-        performance.toFixed(2),
-      ),
+      performanceScore: Number(performance.toFixed(2)),
 
       projectList: projects,
     };
   }
-
-
 
   async getTeamDashboard(userId: string) {
     const [
@@ -2263,79 +2000,54 @@ export class DashboardService {
       //----------------------------------------
       // Distinct Projects
       //----------------------------------------
-      this.taskModel.distinct(
-        'projectId',
-        {
-          assignedTo: userId,
-          isDeleted: false,
-        },
-      ),
+      this.taskModel.distinct('projectId', {
+        assignedTo: userId,
+        isDeleted: false,
+      }),
     ]);
 
     //----------------------------------------
     // KPI Calculations
     //----------------------------------------
 
-    const totalTasks = taskSummary.reduce(
-      (sum, item) => sum + item.count,
-      0,
-    );
+    const totalTasks = taskSummary.reduce((sum, item) => sum + item.count, 0);
 
     const completedTasks =
-      taskSummary.find(
-        (t) => t._id === 'DONE',
-      )?.count || 0;
+      taskSummary.find((t) => t._id === 'DONE')?.count || 0;
 
     const inProgress =
-      taskSummary.find(
-        (t) => t._id === 'IN_PROGRESS',
-      )?.count || 0;
+      taskSummary.find((t) => t._id === 'IN_PROGRESS')?.count || 0;
 
-    const todo =
-      taskSummary.find(
-        (t) => t._id === 'TODO',
-      )?.count || 0;
+    const todo = taskSummary.find((t) => t._id === 'TODO')?.count || 0;
 
-    const openIssues =
-      issueSummary.find(
-        (i) => i._id === 'OPEN',
-      )?.count || 0;
+    const openIssues = issueSummary.find((i) => i._id === 'OPEN')?.count || 0;
 
     const resolvedIssues =
-      issueSummary.find(
-        (i) => i._id === 'RESOLVED',
-      )?.count || 0;
+      issueSummary.find((i) => i._id === 'RESOLVED')?.count || 0;
 
-    const highRisks =
-      riskSummary.find(
-        (r) => r._id === 'HIGH',
-      )?.count || 0;
+    const highRisks = riskSummary.find((r) => r._id === 'HIGH')?.count || 0;
 
-    const overdueTasks =
-      await this.taskModel.countDocuments({
-        assignedTo: new Types.ObjectId(userId),
-        isDeleted: false,
+    const overdueTasks = await this.taskModel.countDocuments({
+      assignedTo: new Types.ObjectId(userId),
+      isDeleted: false,
 
-        dueDate: {
-          $lt: new Date(),
-        },
+      dueDate: {
+        $lt: new Date(),
+      },
 
-        status: {
-          $ne: TaskStatus.DONE,
-        },
-      });
+      status: {
+        $ne: TaskStatus.DONE,
+      },
+    });
 
     const completionRate =
-      totalTasks > 0
-        ? (completedTasks / totalTasks) * 100
-        : 0;
+      totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
     //----------------------------------------
     // Personal Performance Score
     //----------------------------------------
 
-    let performance =
-      completionRate;
+    let performance = completionRate;
 
     performance -= overdueTasks * 3;
 
@@ -2343,10 +2055,7 @@ export class DashboardService {
 
     performance -= highRisks * 2;
 
-    performance = Math.max(
-      0,
-      Math.min(100, performance),
-    );
+    performance = Math.max(0, Math.min(100, performance));
 
     return {
       userId,
@@ -2357,16 +2066,11 @@ export class DashboardService {
         inProgress,
         todo,
         overdue: overdueTasks,
-        completionRate: Number(
-          completionRate.toFixed(2),
-        ),
+        completionRate: Number(completionRate.toFixed(2)),
       },
 
       issues: {
-        total: issueSummary.reduce(
-          (sum, i) => sum + i.count,
-          0,
-        ),
+        total: issueSummary.reduce((sum, i) => sum + i.count, 0),
 
         open: openIssues,
 
@@ -2376,32 +2080,22 @@ export class DashboardService {
       },
 
       risks: {
-        total: riskSummary.reduce(
-          (sum, r) => sum + r.count,
-          0,
-        ),
+        total: riskSummary.reduce((sum, r) => sum + r.count, 0),
 
         high: highRisks,
 
         details: riskSummary,
       },
 
-      activeSprint:
-        activeSprint[0] || null,
+      activeSprint: activeSprint[0] || null,
 
-      totalProjects:
-        projectCount.length,
+      totalProjects: projectCount.length,
 
-      performanceScore: Number(
-        performance.toFixed(2),
-      ),
+      performanceScore: Number(performance.toFixed(2)),
 
       recentTasks,
     };
   }
-
-
-
 
   async getRiskAnalysis() {
     const [
@@ -2622,10 +2316,7 @@ export class DashboardService {
                     $gt: [
                       {
                         $strLenCP: {
-                          $ifNull: [
-                            '$mitigationPlan',
-                            '',
-                          ],
+                          $ifNull: ['$mitigationPlan', ''],
                         },
                       },
                       0,
@@ -2648,10 +2339,7 @@ export class DashboardService {
                 {
                   $multiply: [
                     {
-                      $divide: [
-                        '$withPlan',
-                        '$total',
-                      ],
+                      $divide: ['$withPlan', '$total'],
                     },
                     100,
                   ],
@@ -2672,8 +2360,7 @@ export class DashboardService {
 
         unresolvedRisks,
 
-        highRiskCount:
-          risksByLevel.find(r => r._id === 'HIGH')?.total || 0,
+        highRiskCount: risksByLevel.find((r) => r._id === 'HIGH')?.total || 0,
       },
 
       risksByLevel,
@@ -2686,17 +2373,13 @@ export class DashboardService {
 
       monthlyRisks,
 
-      mitigationCoverage:
-        mitigationCoverage[0] || {
-          total: 0,
-          withPlan: 0,
-          percentage: 0,
-        },
+      mitigationCoverage: mitigationCoverage[0] || {
+        total: 0,
+        withPlan: 0,
+        percentage: 0,
+      },
     };
   }
-
-
-
 
   async getPerformance() {
     const [
@@ -2707,7 +2390,6 @@ export class DashboardService {
       riskPerformance,
       averageProjectDuration,
     ] = await Promise.all([
-
       /**
        * -----------------------------
        * Project Performance
@@ -2761,10 +2443,7 @@ export class DashboardService {
                 {
                   $multiply: [
                     {
-                      $divide: [
-                        '$completedProjects',
-                        '$totalProjects',
-                      ],
+                      $divide: ['$completedProjects', '$totalProjects'],
                     },
                     100,
                   ],
@@ -2821,10 +2500,7 @@ export class DashboardService {
                 {
                   $multiply: [
                     {
-                      $divide: [
-                        '$completedSprints',
-                        '$totalSprints',
-                      ],
+                      $divide: ['$completedSprints', '$totalSprints'],
                     },
                     100,
                   ],
@@ -2881,10 +2557,7 @@ export class DashboardService {
                 {
                   $multiply: [
                     {
-                      $divide: [
-                        '$completedTasks',
-                        '$totalTasks',
-                      ],
+                      $divide: ['$completedTasks', '$totalTasks'],
                     },
                     100,
                   ],
@@ -2941,10 +2614,7 @@ export class DashboardService {
                 {
                   $multiply: [
                     {
-                      $divide: [
-                        '$resolvedIssues',
-                        '$totalIssues',
-                      ],
+                      $divide: ['$resolvedIssues', '$totalIssues'],
                     },
                     100,
                   ],
@@ -3001,10 +2671,7 @@ export class DashboardService {
                 {
                   $multiply: [
                     {
-                      $divide: [
-                        '$mitigatedRisks',
-                        '$totalRisks',
-                      ],
+                      $divide: ['$mitigatedRisks', '$totalRisks'],
                     },
                     100,
                   ],
@@ -3076,13 +2743,9 @@ export class DashboardService {
 
       risks: riskPerformance[0] || {},
 
-      averageProjectDuration:
-        averageProjectDuration[0]?.averageDuration || 0,
+      averageProjectDuration: averageProjectDuration[0]?.averageDuration || 0,
     };
   }
-
-
-
 
   async getTrends() {
     const [
@@ -3093,7 +2756,6 @@ export class DashboardService {
       completionTrend,
       sprintTrend,
     ] = await Promise.all([
-
       /**
        * ----------------------------------------
        * Projects Created Per Month
@@ -3108,8 +2770,8 @@ export class DashboardService {
         {
           $group: {
             _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' },
             },
             totalProjects: {
               $sum: 1,
@@ -3118,8 +2780,8 @@ export class DashboardService {
         },
         {
           $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
+            '_id.year': 1,
+            '_id.month': 1,
           },
         },
       ]),
@@ -3138,8 +2800,8 @@ export class DashboardService {
         {
           $group: {
             _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' },
             },
             totalTasks: {
               $sum: 1,
@@ -3148,10 +2810,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      "$status",
-                      "DONE",
-                    ],
+                    $eq: ['$status', 'DONE'],
                   },
                   1,
                   0,
@@ -3162,8 +2821,8 @@ export class DashboardService {
         },
         {
           $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
+            '_id.year': 1,
+            '_id.month': 1,
           },
         },
       ]),
@@ -3182,8 +2841,8 @@ export class DashboardService {
         {
           $group: {
             _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' },
             },
             totalIssues: {
               $sum: 1,
@@ -3192,10 +2851,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      "$status",
-                      "RESOLVED",
-                    ],
+                    $eq: ['$status', 'RESOLVED'],
                   },
                   1,
                   0,
@@ -3206,8 +2862,8 @@ export class DashboardService {
         },
         {
           $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
+            '_id.year': 1,
+            '_id.month': 1,
           },
         },
       ]),
@@ -3226,8 +2882,8 @@ export class DashboardService {
         {
           $group: {
             _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' },
             },
             totalRisks: {
               $sum: 1,
@@ -3236,10 +2892,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      "$level",
-                      "HIGH",
-                    ],
+                    $eq: ['$level', 'HIGH'],
                   },
                   1,
                   0,
@@ -3250,8 +2903,8 @@ export class DashboardService {
         },
         {
           $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
+            '_id.year': 1,
+            '_id.month': 1,
           },
         },
       ]),
@@ -3270,28 +2923,25 @@ export class DashboardService {
         {
           $group: {
             _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' },
             },
             averageCompletion: {
-              $avg: "$completionPercentage",
+              $avg: '$completionPercentage',
             },
           },
         },
         {
           $project: {
             averageCompletion: {
-              $round: [
-                "$averageCompletion",
-                1,
-              ],
+              $round: ['$averageCompletion', 1],
             },
           },
         },
         {
           $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
+            '_id.year': 1,
+            '_id.month': 1,
           },
         },
       ]),
@@ -3310,8 +2960,8 @@ export class DashboardService {
         {
           $group: {
             _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' },
             },
             totalSprints: {
               $sum: 1,
@@ -3320,10 +2970,7 @@ export class DashboardService {
               $sum: {
                 $cond: [
                   {
-                    $eq: [
-                      "$status",
-                      "COMPLETED",
-                    ],
+                    $eq: ['$status', 'COMPLETED'],
                   },
                   1,
                   0,
@@ -3334,8 +2981,8 @@ export class DashboardService {
         },
         {
           $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
+            '_id.year': 1,
+            '_id.month': 1,
           },
         },
       ]),
@@ -3355,7 +3002,4 @@ export class DashboardService {
       sprints: sprintTrend,
     };
   }
-
-
-
 }

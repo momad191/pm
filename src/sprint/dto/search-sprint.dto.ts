@@ -1,9 +1,9 @@
-import {
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class SearchSprintDto {
+  @IsOptional()
+  companyId: string;
+
   @IsOptional()
   @IsString()
   keyword?: string;

@@ -1,16 +1,10 @@
-import {
-  Controller,
-  Get,
-  Param,
-} from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
 export class DashboardController {
-  constructor(
-    private readonly dashboardService: DashboardService,
-  ) {}
+  constructor(private readonly dashboardService: DashboardService) {}
 
   // =====================================================
   // Dashboard Overview
@@ -20,7 +14,7 @@ export class DashboardController {
   getOverview() {
     return this.dashboardService.getOverview();
   }
- 
+
   // =====================================================
   // Project Health Dashboard
   // =====================================================
@@ -62,9 +56,7 @@ export class DashboardController {
   // =====================================================
 
   @Get('project/:id')
-  getProjectDashboard(
-    @Param('id') id: string,
-  ) {
+  getProjectDashboard(@Param('id') id: string) {
     return this.dashboardService.getProjectDashboard(id);
   }
 
@@ -73,9 +65,7 @@ export class DashboardController {
   // =====================================================
 
   @Get('manager/:managerId')
-  getManagerDashboard(
-    @Param('managerId') managerId: string,
-  ) {
+  getManagerDashboard(@Param('managerId') managerId: string) {
     return this.dashboardService.getManagerDashboard(managerId);
   }
 
@@ -84,9 +74,7 @@ export class DashboardController {
   // =====================================================
 
   @Get('team/:userId')
-  getTeamDashboard(
-    @Param('userId') userId: string,
-  ) {
+  getTeamDashboard(@Param('userId') userId: string) {
     return this.dashboardService.getTeamDashboard(userId);
   }
 

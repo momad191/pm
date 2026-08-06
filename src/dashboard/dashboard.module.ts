@@ -6,16 +6,16 @@ import { Sprint, SprintSchema } from '../sprint/schemas/sprint.schema';
 import { Task, TaskSchema } from '../task/schemas/task.schema';
 import { Risk, RiskSchema } from '../risk/schemas/risk.schema';
 import { Issue, IssueSchema } from '../issue/schemas/issue.schema';
-import { Notification, NotificationSchema } from '../notification/schemas/notification.schema';
+import {
+  Notification,
+  NotificationSchema,
+} from '../notification/schemas/notification.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 
-
 @Module({
   imports: [
-
     MongooseModule.forFeature([
-
       {
         name: User.name,
         schema: UserSchema,
@@ -49,22 +49,12 @@ import { MongooseModule } from '@nestjs/mongoose';
       {
         name: Notification.name,
         schema: NotificationSchema,
-      }
-
-    ])
-
+      },
+    ]),
   ],
 
-  controllers: [
-    DashboardController
-  ],
+  controllers: [DashboardController],
 
-  providers: [
-    DashboardService
-  ]
-
+  providers: [DashboardService],
 })
-
-
-
-export class DashboardModule { }
+export class DashboardModule {}

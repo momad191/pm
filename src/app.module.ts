@@ -12,6 +12,9 @@ import { RiskModule } from './risk/risk.module';
 import { IssueModule } from './issue/issue.module';
 import { NotificationModule } from './notification/notification.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { TeamModule } from './team/team.module';
+import { CompanyModule } from './company/company.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
     IssueModule,
     NotificationModule,
     DashboardModule,
+    TeamModule,
+    CompanyModule,
+    ChatbotModule,
   ],
   controllers: [AppController],
   providers: [AppService],

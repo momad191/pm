@@ -7,6 +7,13 @@ import {
 
 export class SearchUserDto {
   @IsOptional()
+  companyId: string;
+
+  @IsOptional()
+  @IsString()
+  teamId?: string;
+
+  @IsOptional()
   @IsString()
   keyword?: string;
 

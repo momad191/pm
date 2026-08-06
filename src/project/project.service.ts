@@ -16,30 +16,30 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 
 import { SearchProjectDto } from './dto/search-project.dto';
 
-
-import { ProjectCounter, ProjectCounterDocument } from './schemas/counter.schema';
+import {
+  ProjectCounter,
+  ProjectCounterDocument,
+} from './schemas/counter.schema';
 
 @Injectable()
 export class ProjectService {
   constructor(
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-    @InjectModel(ProjectCounter.name) private counterModel: Model<ProjectCounterDocument>,
-  ) { }
-
+    @InjectModel(ProjectCounter.name)
+    private counterModel: Model<ProjectCounterDocument>,
+  ) {}
 
   async getNextProjectId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
       { name: 'projectId' },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true }
+      { new: true, upsert: true },
     );
 
     return counter.seq;
   }
 
-
   async create(dto: CreateProjectDto) {
-
     const nextProjectId = await this.getNextProjectId();
 
     // const exists =
@@ -68,7 +68,6 @@ export class ProjectService {
       projectId: `PRO-${nextProjectId.toString()}`,
       month,
       year,
-
     });
   }
 
@@ -199,7 +198,6 @@ export class ProjectService {
       filter.month = month.trim();
     }
 
-
     if (projectId) filter.projectId = projectId;
 
     if (managerId) filter.managerId = managerId;
@@ -256,7 +254,6 @@ export class ProjectService {
 
     console.log('Filter:', filter);
 
-
     const data = await this.projectModel
       .find(filter)
       .sort({
@@ -276,294 +273,256 @@ export class ProjectService {
     };
   }
 
-
   async dashboard() {
-
     const result = await this.projectModel.aggregate([
-
-        {
-            $match:{
-                isDeleted:false
-            }
+      {
+        $match: {
+          isDeleted: false,
         },
+      },
 
-        {
-            $facet:{
+      {
+        $facet: {
+          //----------------------------------
+          // Summary
+          //----------------------------------
 
-                //----------------------------------
-                // Summary
-                //----------------------------------
+          summary: [
+            {
+              $group: {
+                _id: null,
 
-                summary:[
+                totalProjects: {
+                  $sum: 1,
+                },
 
-                    {
-                        $group:{
+                activeProjects: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $eq: ['$status', 'ACTIVE'],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
 
-                            _id:null,
+                completedProjects: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $eq: ['$status', 'COMPLETED'],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
 
-                            totalProjects:{
-                                $sum:1
-                            },
+                planningProjects: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $eq: ['$status', 'PLANNING'],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
 
-                            activeProjects:{
-                                $sum:{
-                                    $cond:[
-                                        {
-                                            $eq:["$status","ACTIVE"]
-                                        },
-                                        1,
-                                        0
-                                    ]
-                                }
-                            },
+                onHoldProjects: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $eq: ['$status', 'ON_HOLD'],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
 
-                            completedProjects:{
-                                $sum:{
-                                    $cond:[
-                                        {
-                                            $eq:["$status","COMPLETED"]
-                                        },
-                                        1,
-                                        0
-                                    ]
-                                }
-                            },
+                completionAverage: {
+                  $avg: '$completionPercentage',
+                },
+              },
+            },
+          ],
 
-                            planningProjects:{
-                                $sum:{
-                                    $cond:[
-                                        {
-                                            $eq:["$status","PLANNING"]
-                                        },
-                                        1,
-                                        0
-                                    ]
-                                }
-                            },
+          //----------------------------------
+          // Status
+          //----------------------------------
 
-                            onHoldProjects:{
-                                $sum:{
-                                    $cond:[
-                                        {
-                                            $eq:["$status","ON_HOLD"]
-                                        },
-                                        1,
-                                        0
-                                    ]
-                                }
-                            },
+          statusChart: [
+            {
+              $group: {
+                _id: '$status',
+                count: {
+                  $sum: 1,
+                },
+              },
+            },
 
-                            completionAverage:{
-                                $avg:"$completionPercentage"
-                            }
+            {
+              $project: {
+                _id: 0,
+                status: '$_id',
+                count: 1,
+              },
+            },
+          ],
 
-                        }
-                    }
+          //----------------------------------
+          // Departments
+          //----------------------------------
 
-                ],
+          departmentChart: [
+            {
+              $group: {
+                _id: '$department',
+                count: {
+                  $sum: 1,
+                },
+              },
+            },
 
-                //----------------------------------
-                // Status
-                //----------------------------------
+            {
+              $sort: {
+                count: -1,
+              },
+            },
 
-                statusChart:[
+            {
+              $project: {
+                _id: 0,
+                department: '$_id',
+                count: 1,
+              },
+            },
+          ],
 
-                    {
-                        $group:{
-                            _id:"$status",
-                            count:{
-                                $sum:1
-                            }
-                        }
-                    },
+          //----------------------------------
+          // Monthly
+          //----------------------------------
 
-                    {
-                        $project:{
-                            _id:0,
-                            status:"$_id",
-                            count:1
-                        }
-                    }
+          monthlyProjects: [
+            {
+              $group: {
+                _id: '$month',
+                count: {
+                  $sum: 1,
+                },
+              },
+            },
 
-                ],
+            {
+              $sort: {
+                _id: 1,
+              },
+            },
 
-                //----------------------------------
-                // Departments
-                //----------------------------------
+            {
+              $project: {
+                _id: 0,
+                month: '$_id',
+                count: 1,
+              },
+            },
+          ],
 
-                departmentChart:[
+          //----------------------------------
+          // Top Managers
+          //----------------------------------
 
-                    {
-                        $group:{
-                            _id:"$department",
-                            count:{
-                                $sum:1
-                            }
-                        }
-                    },
+          topManagers: [
+            {
+              $group: {
+                _id: '$managerId',
 
-                    {
-                        $sort:{
-                            count:-1
-                        }
-                    },
+                projects: {
+                  $sum: 1,
+                },
 
-                    {
-                        $project:{
-                            _id:0,
-                            department:"$_id",
-                            count:1
-                        }
-                    }
+                averageCompletion: {
+                  $avg: '$completionPercentage',
+                },
+              },
+            },
 
-                ],
+            {
+              $sort: {
+                projects: -1,
+              },
+            },
 
-                //----------------------------------
-                // Monthly
-                //----------------------------------
+            {
+              $limit: 10,
+            },
 
-                monthlyProjects:[
+            {
+              $project: {
+                _id: 0,
+                managerId: '$_id',
+                projects: 1,
+                averageCompletion: {
+                  $round: ['$averageCompletion', 2],
+                },
+              },
+            },
+          ],
 
-                    {
-                        $group:{
-                            _id:"$month",
-                            count:{
-                                $sum:1
-                            }
-                        }
-                    },
+          //----------------------------------
+          // Completion Distribution
+          //----------------------------------
 
-                    {
-                        $sort:{
-                            _id:1
-                        }
-                    },
+          completionDistribution: [
+            {
+              $bucket: {
+                groupBy: '$completionPercentage',
 
-                    {
-                        $project:{
-                            _id:0,
-                            month:"$_id",
-                            count:1
-                        }
-                    }
+                boundaries: [0, 25, 50, 75, 101],
 
-                ],
+                default: 'Other',
 
-                //----------------------------------
-                // Top Managers
-                //----------------------------------
-
-                topManagers:[
-
-                    {
-                        $group:{
-
-                            _id:"$managerId",
-
-                            projects:{
-                                $sum:1
-                            },
-
-                            averageCompletion:{
-                                $avg:"$completionPercentage"
-                            }
-
-                        }
-                    },
-
-                    {
-                        $sort:{
-                            projects:-1
-                        }
-                    },
-
-                    {
-                        $limit:10
-                    },
-
-                    {
-                        $project:{
-                            _id:0,
-                            managerId:"$_id",
-                            projects:1,
-                            averageCompletion:{
-                                $round:[
-                                    "$averageCompletion",
-                                    2
-                                ]
-                            }
-                        }
-                    }
-
-                ],
-
-                //----------------------------------
-                // Completion Distribution
-                //----------------------------------
-
-                completionDistribution:[
-
-                    {
-                        $bucket:{
-
-                            groupBy:"$completionPercentage",
-
-                            boundaries:[
-                                0,
-                                25,
-                                50,
-                                75,
-                                101
-                            ],
-
-                            default:"Other",
-
-                            output:{
-                                count:{
-                                    $sum:1
-                                }
-                            }
-
-                        }
-                    }
-
-                ]
-
-            }
-
-        }
-
+                output: {
+                  count: {
+                    $sum: 1,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
     ]);
 
-    return{
+    return {
+      summary: result[0].summary[0] ?? {},
 
-        summary:result[0].summary[0] ?? {},
+      statusChart: result[0].statusChart,
 
-        statusChart:result[0].statusChart,
+      departmentChart: result[0].departmentChart,
 
-        departmentChart:result[0].departmentChart,
+      monthlyProjects: result[0].monthlyProjects,
 
-        monthlyProjects:result[0].monthlyProjects,
+      completionDistribution: result[0].completionDistribution.map((x) => ({
+        range:
+          x._id === 0
+            ? '0-25'
+            : x._id === 25
+              ? '26-50'
+              : x._id === 50
+                ? '51-75'
+                : x._id === 75
+                  ? '76-100'
+                  : 'Other',
 
-        completionDistribution:result[0].completionDistribution.map(x=>({
+        count: x.count,
+      })),
 
-            range:
-                x._id===0 ? "0-25" :
-                x._id===25 ? "26-50" :
-                x._id===50 ? "51-75" :
-                x._id===75 ? "76-100" :
-                "Other",
-
-            count:x.count
-
-        })),
-
-        topManagers:result[0].topManagers
-
+      topManagers: result[0].topManagers,
     };
-
+  }
 }
-
-
-}
- 

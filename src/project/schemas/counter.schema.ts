@@ -5,7 +5,6 @@ export type ProjectCounterDocument = ProjectCounter & Document;
 
 @Schema()
 export class ProjectCounter {
-
   @Prop({ required: true, unique: true })
   name: string;
 
@@ -13,4 +12,5 @@ export class ProjectCounter {
   seq: number;
 }
 
-export const ProjectCounterSchema = SchemaFactory.createForClass(ProjectCounter); 
+export const ProjectCounterSchema =
+  SchemaFactory.createForClass(ProjectCounter);

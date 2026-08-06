@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type ProjectDocument = Project & Document;
 
@@ -16,10 +16,17 @@ export enum ProjectStatus {
 })
 export class Project {
   @Prop({
+    type: Types.ObjectId,
+    ref: 'Company',
+    required: true,
+  })
+  companyId: Types.ObjectId;
+
+  @Prop({
     type: String,
     unique: true,
     index: true,
-    required: true
+    required: true,
   })
   projectId: string;
 
