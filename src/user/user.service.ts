@@ -141,7 +141,7 @@ export class UserService {
           isDeleted: true,
         },
         {
-          new: true,
+          returnDocument: 'after'
         },
       );
 

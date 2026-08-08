@@ -27,4 +27,29 @@ export class CreateNotificationDto {
   @IsOptional()
   @IsBoolean()
   isRead?: boolean;
+
+  @IsString()
+  referenceType?: string
+
+  @IsString()
+  referenceId?: string;
+
+  @IsMongoId()
+  projectId?: string;
+
+  @IsMongoId()
+  createdBy?: string;
+
+
+  @IsString()
+  priority: string;
+
+
+  @IsString()
+  actionUrl?: string
+
+
+
+
+
 }

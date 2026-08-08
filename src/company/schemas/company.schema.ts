@@ -43,10 +43,28 @@ export class Company {
   companyName: string;
 
   @Prop({
+    required: true,
     trim: true,
     maxlength: 200,
   })
   legalName: string;
+
+
+
+  @Prop({
+    required: true,
+    trim: true,
+    maxlength: 200,
+  })
+  managerFirstName:string;
+
+
+  @Prop({
+    required: true,
+    trim: true,
+    maxlength: 200,
+  })
+  managerLastName:string;
 
   @Prop({
     trim: true,
@@ -72,6 +90,7 @@ export class Company {
     index: true,
   })
   email: string;
+
 
   @Prop({
     trim: true,

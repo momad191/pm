@@ -24,6 +24,8 @@ export enum NotificationType {
   PROJECT_CREATED = 'PROJECT_CREATED',
 
   SPRINT_STARTED = 'SPRINT_STARTED',
+
+
 }
 
 export enum NotificationReferenceType {
@@ -83,6 +85,32 @@ export class Notification {
   })
   userId: Types.ObjectId;
 
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  })
+  createdBy: Types.ObjectId;
+
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Project',
+    required: true,
+    index: true,
+  })
+  projectId: Types.ObjectId;
+
+
+
+  @Prop({
+  })
+  referenceId?: string;
+
+
+
   @Prop({
     required: true,
     trim: true,
@@ -113,20 +141,13 @@ export class Notification {
   })
   isDeleted: boolean;
 
-  @Prop({
-    type: Types.ObjectId,
-  })
-  referenceId?: Types.ObjectId;
 
   @Prop({
     enum: NotificationReferenceType,
   })
   referenceType?: NotificationReferenceType;
 
-  @Prop({
-    trim: true,
-  })
-  actionUrl?: string;
+  
 
   @Prop({
     default: false,
@@ -147,6 +168,14 @@ export class Notification {
     default: NotificationPriority.NORMAL,
   })
   priority: NotificationPriority;
+
+
+  @Prop({
+    required: false,
+    trim: true,
+    maxlength: 1000,
+  })
+  actionUrl: string
 
   @Prop({
     enum: NotificationSource,

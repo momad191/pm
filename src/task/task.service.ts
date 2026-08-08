@@ -30,7 +30,7 @@ export class TaskService {
     const counter = await this.counterModel.findOneAndUpdate(
       { name: 'taskId' },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true },
+      { returnDocument: 'after', upsert: true },
     );
 
     return counter.seq;

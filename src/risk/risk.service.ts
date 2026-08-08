@@ -31,7 +31,7 @@ export class RiskService {
     const counter = await this.counterModel.findOneAndUpdate(
       { name: 'riskId' },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true },
+      { returnDocument: 'after', upsert: true },
     );
 
     return counter.seq;

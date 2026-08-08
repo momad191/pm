@@ -40,4 +40,8 @@ export class SearchUserDto {
   @IsOptional()
   @IsString()
   sortOrder?: string;
+
+  @IsOptional()
+  @IsString()
+  username: string;
 }

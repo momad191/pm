@@ -1,9 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 
 import { ChatbotService } from './chatbot.service';
 
@@ -11,9 +6,7 @@ import { ChatDto } from './dto/chat.dto';
 
 @Controller('chatbot')
 export class ChatbotController {
-  constructor(
-    private readonly chatbotService: ChatbotService,
-  ) {}
+  constructor(private readonly chatbotService: ChatbotService) {}
 
   /**
    * ------------------------------------

@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 
 import { HttpService } from '@nestjs/axios';
 
@@ -28,24 +25,18 @@ export class ChatbotService {
    */
   async chat(chatDto: ChatDto) {
     try {
-      const baseUrl =
-        this.configService.get<string>(
-          'AI_AGENT_URL',
-        );
+      const baseUrl = this.configService.get<string>('AI_AGENT_URL');
 
       const response = await firstValueFrom(
         this.httpService.post(
           `${baseUrl}/chat`,
           {
             question: chatDto.question,
-            openai_api_key:chatDto.openai_api_key,
+            openai_api_key: chatDto.openai_api_key,
+            thread_id: chatDto.thread_id,
           },
           {
-            timeout:
-              this.configService.get<number>(
-                'AI_AGENT_TIMEOUT',
-                60000,
-              ),
+            timeout: this.configService.get<number>('AI_AGENT_TIMEOUT', 60000),
           },
         ),
       );
@@ -59,11 +50,8 @@ export class ChatbotService {
 
       throw new ServiceUnavailableException({
         success: false,
-        message:
-          'Unable to communicate with the AI Agent.',
-        error:
-          err.response?.data ??
-          err.message,
+        message: 'Unable to communicate with the AI Agent.',
+        error: err.response?.data ?? err.message,
       });
     }
   }
@@ -75,18 +63,12 @@ export class ChatbotService {
    */
   async health() {
     try {
-      const baseUrl =
-        this.configService.get<string>(
-          'AI_AGENT_URL',
-        );
+      const baseUrl = this.configService.get<string>('AI_AGENT_URL');
 
       const response = await firstValueFrom(
-        this.httpService.get(
-          `${baseUrl}/health`,
-          {
-            timeout: 5000,
-          },
-        ),
+        this.httpService.get(`${baseUrl}/health`, {
+          timeout: 5000,
+        }),
       );
 
       return {
@@ -98,8 +80,7 @@ export class ChatbotService {
       return {
         success: false,
         status: 'OFFLINE',
-        message:
-          'AI Agent is unavailable.',
+        message: 'AI Agent is unavailable.',
       };
     }
   }
@@ -111,18 +92,12 @@ export class ChatbotService {
    */
   async info() {
     try {
-      const baseUrl =
-        this.configService.get<string>(
-          'AI_AGENT_URL',
-        );
+      const baseUrl = this.configService.get<string>('AI_AGENT_URL');
 
       const response = await firstValueFrom(
-        this.httpService.get(
-          `${baseUrl}/info`,
-          {
-            timeout: 5000,
-          },
-        ),
+        this.httpService.get(`${baseUrl}/info`, {
+          timeout: 5000,
+        }),
       );
 
       return {
@@ -133,15 +108,8 @@ export class ChatbotService {
       return {
         success: true,
         provider: 'LangGraph',
-        endpoint:
-          this.configService.get(
-            'AI_AGENT_URL',
-          ),
-        timeout:
-          this.configService.get(
-            'AI_AGENT_TIMEOUT',
-            60000,
-          ),
+        endpoint: this.configService.get('AI_AGENT_URL'),
+        timeout: this.configService.get('AI_AGENT_TIMEOUT', 60000),
         version: '1.0.0',
       };
     }

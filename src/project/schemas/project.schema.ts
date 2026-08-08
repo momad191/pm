@@ -22,6 +22,17 @@ export class Project {
   })
   companyId: Types.ObjectId;
 
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: true,
+  })
+  createdBy: Types.ObjectId;
+
+
+
+
   @Prop({
     type: String,
     unique: true,
@@ -53,6 +64,9 @@ export class Project {
   @Prop()
   department: string;
 
+
+
+
   @Prop({
     type: String,
     enum: [
@@ -81,6 +95,8 @@ export class Project {
     default: false,
   })
   isDeleted: boolean;
+
+
 }
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);

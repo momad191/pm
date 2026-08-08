@@ -7,5 +7,9 @@ export class ChatDto {
 
   @IsString()
   @IsNotEmpty()
-  openai_api_key?: string
+  openai_api_key?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  thread_id?: string;
 }

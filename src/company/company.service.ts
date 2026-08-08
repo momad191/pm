@@ -14,26 +14,43 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { SearchCompanyDto } from './dto/search-company.dto';
 
+import { User, UserDocument, UserRole } from '../user/schemas/user.schema';
+
 import {
   CompanyCounter,
   CompanyCounterDocument,
 } from './schemas/counter.schema';
 
+import * as bcrypt from 'bcrypt';
+
+import { EmailService } from '../email/email.service';
+
+
 @Injectable()
 export class CompanyService {
   constructor(
+    private readonly emailService: EmailService,
     @InjectModel(Company.name)
     private readonly companyModel: Model<CompanyDocument>,
 
     @InjectModel(CompanyCounter.name)
     private counterModel: Model<CompanyCounterDocument>,
+
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
+
   ) {}
 
   async getNextCompanyId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
       { name: 'companyId' },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true },
+
+      { 
+        returnDocument: 'after',
+        upsert: true 
+      },
+
     );
 
     return counter.seq;
@@ -45,7 +62,7 @@ export class CompanyService {
 
   async create(dto: CreateCompanyDto) {
     const nextCompanyId = await this.getNextCompanyId();
-
+ 
     const exists = await this.companyModel.findOne({
       $or: [
         {
@@ -65,10 +82,50 @@ export class CompanyService {
       throw new ConflictException('Company already exists.');
     }
 
-    return this.companyModel.create({
+    const createdCompany = await this.companyModel.create({
       ...dto,
       companyId: `COMP-${nextCompanyId.toString()}`,
     });
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(
+      // "123123",
+      dto.password,
+      10,
+    );
+  
+   
+    const createdUser = await this.userModel.create(
+      {
+        companyId: createdCompany._id.toString(),
+        firstName:dto.managerFirstName,
+        lastName:dto.managerLastName,
+        username: dto.email, 
+        email: dto.email,
+        password: hashedPassword,
+        role: UserRole.ADMIN,
+        isActive: false,
+      }
+    )
+
+ 
+    await createdUser.save();
+
+    const html = `
+    <p>Hello</p>
+    <p>Your account created Successfully this is your id ${createdCompany._id}</p>
+    <p> Activate you account by click here <a href=http://localhost:3000/complete-registration/${createdUser._id}"> </a></p>
+  `;
+
+
+      await this.emailService.sendToHrManager(
+      createdCompany.email,
+      `Your Account Created Successfully`,
+      html,
+    );
+
+    return createdCompany
+
   }
 
   // ---------------------------------------------------------
@@ -239,7 +296,7 @@ export class CompanyService {
       },
       dto,
       {
-        new: true,
+        returnDocument: 'after'
       },
     );
 
@@ -264,7 +321,7 @@ export class CompanyService {
         status,
       },
       {
-        new: true,
+        returnDocument: 'after'
       },
     );
 
@@ -289,7 +346,7 @@ export class CompanyService {
         logo,
       },
       {
-        new: true,
+        returnDocument: 'after'
       },
     );
 
@@ -314,7 +371,7 @@ export class CompanyService {
         isDeleted: true,
       },
       {
-        new: true,
+        returnDocument: 'after'
       },
     );
 

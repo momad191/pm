@@ -12,9 +12,10 @@ export class CreateProjectDto {
   @IsMongoId()
   companyId: string;
 
-  // @IsString()
-  // projectId: string;
+  @IsMongoId()
+  createdBy: string;
 
+  
   @IsString()
   name: string;
 

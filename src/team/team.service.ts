@@ -29,7 +29,7 @@ export class TeamService {
     const counter = await this.counterModel.findOneAndUpdate(
       { name: 'teamId' },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true },
+      { returnDocument: 'after', upsert: true },
     );
 
     return counter.seq;

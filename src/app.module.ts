@@ -15,9 +15,12 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { TeamModule } from './team/team.module';
 import { CompanyModule } from './company/company.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
-
+import { ReportModule } from './report/report.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+  
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGO_URI!),
     UserModule,
@@ -32,6 +35,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
     TeamModule,
     CompanyModule,
     ChatbotModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

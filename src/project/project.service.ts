@@ -21,19 +21,26 @@ import {
   ProjectCounterDocument,
 } from './schemas/counter.schema';
 
+
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import { ProjectCreatedEvent } from './events/project-created.event';
+
+
 @Injectable()
 export class ProjectService {
   constructor(
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     @InjectModel(ProjectCounter.name)
     private counterModel: Model<ProjectCounterDocument>,
-  ) {}
+    private readonly eventEmitter: EventEmitter2,
+  ) { }
 
   async getNextProjectId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
       { name: 'projectId' },
       { $inc: { seq: 1 } },
-      { new: true, upsert: true },
+      { returnDocument: 'after', upsert: true },
     );
 
     return counter.seq;
@@ -63,12 +70,31 @@ export class ProjectService {
       year = String(startDate.getFullYear());
     }
 
-    return this.projectModel.create({
+
+    const project = await this.projectModel.create({
       ...dto,
       projectId: `PRO-${nextProjectId.toString()}`,
       month,
       year,
     });
+  
+    // -----------------------------------------
+    // Emit Project Created Event
+    // -----------------------------------------
+
+    console.log("----------------------------------------------:::::",project)
+
+    this.eventEmitter.emit(
+      'project.created',
+      new ProjectCreatedEvent(
+        project
+      ),
+    );
+
+      
+
+    return project;
+
   }
 
   async findAll() {

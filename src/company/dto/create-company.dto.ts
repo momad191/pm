@@ -21,10 +21,20 @@ export class CreateCompanyDto {
   @MaxLength(150)
   companyName: string;
 
-  @IsOptional()
+ 
   @IsString()
-  @MaxLength(200)
+  @MaxLength(500)
   legalName?: string;
+
+
+  @IsString()
+  @MaxLength(500)
+  managerFirstName?: string;
+
+
+  @IsString()
+  @MaxLength(500)
+  managerLastName?: string;
 
   @IsOptional()
   @IsString()
@@ -43,6 +53,10 @@ export class CreateCompanyDto {
   @IsOptional()
   @IsEmail()
   email?: string;
+
+  @IsString()
+  @MinLength(6)
+  password: string;
 
   @IsOptional()
   @IsString()

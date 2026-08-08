@@ -62,4 +62,8 @@ export class SearchProjectDto {
   @IsOptional()
   @IsDateString()
   endDate?: Date;
+
+
+  @IsOptional()
+  createdBy:string;
 }

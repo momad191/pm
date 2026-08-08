@@ -2,14 +2,16 @@ import { Module } from '@nestjs/common';
 
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { NotificationController } from './notification.controller';
+
+import { NotificationService } from './notification.service';
+
 import {
   Notification,
   NotificationSchema,
 } from './schemas/notification.schema';
 
-import { NotificationController } from './notification.controller';
-
-import { NotificationService } from './notification.service';
+import { ProjectCreatedListener } from './listeners/project-created.listener';
 
 @Module({
   imports: [
@@ -20,10 +22,10 @@ import { NotificationService } from './notification.service';
       },
     ]),
   ],
-
+ 
   controllers: [NotificationController],
 
-  providers: [NotificationService],
+  providers: [NotificationService, ProjectCreatedListener,],
 
   exports: [NotificationService],
 })
