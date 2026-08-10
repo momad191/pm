@@ -29,7 +29,7 @@ export class CreateNotificationDto {
   isRead?: boolean;
 
   @IsString()
-  referenceType?: string
+  referenceType?: string;
 
   @IsString()
   referenceId?: string;
@@ -37,19 +37,19 @@ export class CreateNotificationDto {
   @IsMongoId()
   projectId?: string;
 
+  @IsOptional()
   @IsMongoId()
   createdBy?: string;
+
+
+  @IsOptional()
+  @IsMongoId()
+  updatedBy?: string;
 
 
   @IsString()
   priority: string;
 
-
   @IsString()
-  actionUrl?: string
-
-
-
-
-
+  actionUrl?: string;
 }

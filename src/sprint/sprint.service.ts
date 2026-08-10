@@ -16,6 +16,12 @@ import { SearchSprintDto } from './dto/search-sprint.dto';
 
 import { SprintCounter, SprintCounterDocument } from './schemas/counter.schema';
 
+
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { SprintCreatedEvent } from './events/sprint-created.event';
+import { SprintUpdatedEvent } from './events/sprint-updated.event';
+
+
 @Injectable()
 export class SprintService {
   constructor(
@@ -23,6 +29,7 @@ export class SprintService {
     private readonly sprintModel: Model<SprintDocument>,
     @InjectModel(SprintCounter.name)
     private counterModel: Model<SprintCounterDocument>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async getNextSprintId(): Promise<number> {
@@ -51,6 +58,9 @@ export class SprintService {
       ...createSprintDto,
       sprintId: `SPRINT-${nextSprintId}`,
     });
+
+
+    this.eventEmitter.emit('sprint.created', new SprintCreatedEvent(sprint));
 
     return sprint;
   }
@@ -88,6 +98,8 @@ export class SprintService {
     if (!sprint) {
       throw new NotFoundException('Sprint not found');
     }
+
+    this.eventEmitter.emit('sprint.updated', new SprintUpdatedEvent(sprint));
 
     return sprint;
   }
@@ -217,6 +229,8 @@ export class SprintService {
 
     await sprint.save();
 
+     this.eventEmitter.emit('sprint.updated', new SprintUpdatedEvent(sprint));
+
     return sprint;
   }
 
@@ -232,6 +246,8 @@ export class SprintService {
     sprint.progressPercentage = 100;
 
     await sprint.save();
+
+    this.eventEmitter.emit('sprint.updated', new SprintUpdatedEvent(sprint));
 
     return sprint;
   }

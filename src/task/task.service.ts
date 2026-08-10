@@ -17,6 +17,11 @@ import { SearchTaskDto } from './dto/search-task.dto';
 
 import { TaskCounter, TaskCounterDocument } from './schemas/counter.schema';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { TaskCreatedEvent } from './events/task-created.event';
+import { TaskUpdatedEvent } from './events/task-updated.event';
+
+
 @Injectable()
 export class TaskService {
   constructor(
@@ -24,7 +29,8 @@ export class TaskService {
     private readonly taskModel: Model<TaskDocument>,
     @InjectModel(TaskCounter.name)
     private counterModel: Model<TaskCounterDocument>,
-  ) {}
+    private readonly eventEmitter: EventEmitter2,
+  ) { }
 
   async getNextTaskId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
@@ -50,6 +56,8 @@ export class TaskService {
       ...createTaskDto,
       taskId: `TASK-${await this.getNextTaskId()}`,
     });
+
+    this.eventEmitter.emit('task.created', new TaskCreatedEvent(task));
 
     return task;
   }
@@ -82,6 +90,7 @@ export class TaskService {
   }
 
   async update(id: string, updateTaskDto: UpdateTaskDto) {
+
     const task = await this.taskModel.findByIdAndUpdate(id, updateTaskDto, {
       returnDocument: 'after',
     });
@@ -89,6 +98,8 @@ export class TaskService {
     if (!task) {
       throw new NotFoundException('Task not found');
     }
+
+    this.eventEmitter.emit('task.updated', new TaskUpdatedEvent(task));
 
     return task;
   }
@@ -251,16 +262,18 @@ export class TaskService {
       });
   }
 
-  async updateStatus(id: string, status: string) {
-    const task = await this.taskModel.findById(id);
+  async updateStatus(id: string, updateTaskDto: UpdateTaskDto) {
+
+    const task = await this.taskModel.findByIdAndUpdate(id, updateTaskDto, {
+      returnDocument: 'after',
+    });
 
     if (!task) {
       throw new NotFoundException('Task not found');
     }
 
-    task.status = status as TaskStatus;
 
-    await task.save();
+    this.eventEmitter.emit('task.updated', new TaskUpdatedEvent(task));
 
     return task;
   }

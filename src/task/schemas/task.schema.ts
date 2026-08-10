@@ -36,6 +36,17 @@ export class Task {
   })
   companyId: Types.ObjectId;
 
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: false,
+  })
+  updatedBy: Types.ObjectId;
+
+
+
+
   @Prop({
     required: false,
     unique: true,

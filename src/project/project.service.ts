@@ -15,18 +15,16 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 
 import { SearchProjectDto } from './dto/search-project.dto';
-
+ 
 import {
   ProjectCounter,
   ProjectCounterDocument,
 } from './schemas/counter.schema';
-
-
+ 
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
 import { ProjectCreatedEvent } from './events/project-created.event';
-
-
+import { ProjectUpdatedEvent } from './events/project-updated.event';
+ 
 @Injectable()
 export class ProjectService {
   constructor(
@@ -34,7 +32,7 @@ export class ProjectService {
     @InjectModel(ProjectCounter.name)
     private counterModel: Model<ProjectCounterDocument>,
     private readonly eventEmitter: EventEmitter2,
-  ) { }
+  ) {}
 
   async getNextProjectId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
@@ -69,38 +67,29 @@ export class ProjectService {
       month = String(startDate.getMonth() + 1);
       year = String(startDate.getFullYear());
     }
-
-
+ 
     const project = await this.projectModel.create({
       ...dto,
       projectId: `PRO-${nextProjectId.toString()}`,
       month,
       year,
     });
-  
+
     // -----------------------------------------
     // Emit Project Created Event
     // -----------------------------------------
 
-    console.log("----------------------------------------------:::::",project)
+    console.log('----------------------------------------------:::::', project);
 
-    this.eventEmitter.emit(
-      'project.created',
-      new ProjectCreatedEvent(
-        project
-      ),
-    );
-
-      
+    this.eventEmitter.emit('project.created', new ProjectCreatedEvent(project));
 
     return project;
-
   }
 
   async findAll() {
     return this.projectModel.find({ isDeleted: false }).sort({ createdAt: -1 });
   }
-
+ 
   async findOne(id: string) {
     const project = await this.projectModel.findById(id);
 
@@ -120,6 +109,13 @@ export class ProjectService {
       throw new NotFoundException('Project not found');
     }
 
+    const previousManagerId = project.managerId?.toString();
+
+    this.eventEmitter.emit(
+      'project.updated',
+      new ProjectUpdatedEvent(project, previousManagerId),
+    );
+
     return project;
   }
 
@@ -135,6 +131,7 @@ export class ProjectService {
       throw new BadRequestException('Invalid product ID');
     const deleted = await this.projectModel.findByIdAndDelete(id);
     if (!deleted) throw new NotFoundException('project not found');
+
     return { message: `project ${id} deleted` };
   }
 

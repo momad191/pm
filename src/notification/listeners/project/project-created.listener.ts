@@ -1,33 +1,28 @@
 import { Injectable } from '@nestjs/common';
+
 import { OnEvent } from '@nestjs/event-emitter';
 
-import { ProjectCreatedEvent } from '../../project/events/project-created.event';
-
-import { NotificationService } from '../notification.service';
+import { ProjectCreatedEvent } from '../../../project/events/project-created.event';
+ 
+import { NotificationService } from '../../notification.service';
 
 import {
   NotificationPriority,
   NotificationReferenceType,
   NotificationType,
-} from '../schemas/notification.schema';
+} from '../../schemas/notification.schema';
 
 @Injectable()
 export class ProjectCreatedListener {
-  constructor(
-    private readonly notificationService: NotificationService,
-  ) {}
+  constructor(private readonly notificationService: NotificationService) {}
 
   @OnEvent('project.created')
-  async handleProjectCreated(
-    event: ProjectCreatedEvent,
-  ) {
-    const {
-      project,
-    } = event;
+  async handleProjectCreated(event: ProjectCreatedEvent) {
+    const { project } = event;
 
     const projectId = project?._id?.toString();
 
-    const createdBy = project?.createdBy?.toString()
+    const createdBy = project?.createdBy?.toString();
 
     const companyId = project?.companyId?.toString();
 
@@ -41,12 +36,10 @@ export class ProjectCreatedListener {
 
     if (managerId) {
       await this.notificationService.create({
-
         companyId: companyId,
 
         projectId: projectId,
 
-        
         userId: managerId,
 
         createdBy: createdBy,
@@ -59,8 +52,7 @@ export class ProjectCreatedListener {
 
         referenceId: projectId,
 
-        referenceType:
-          NotificationReferenceType.PROJECT,
+        referenceType: NotificationReferenceType.PROJECT,
 
         priority: NotificationPriority.NORMAL,
 
@@ -72,16 +64,11 @@ export class ProjectCreatedListener {
     // 2. Notify Project Creator
     // =====================================================
 
-    if (
-      createdBy &&
-      createdBy !== managerId
-    ) {
+    if (createdBy && createdBy !== managerId) {
       await this.notificationService.create({
-
         companyId: companyId,
 
         userId: createdBy,
-
 
         title: 'Project Created Successfully',
 
@@ -91,8 +78,7 @@ export class ProjectCreatedListener {
 
         referenceId: projectId,
 
-        referenceType:
-          NotificationReferenceType.PROJECT,
+        referenceType: NotificationReferenceType.PROJECT,
 
         priority: NotificationPriority.NORMAL,
 

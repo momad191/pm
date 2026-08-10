@@ -12,6 +12,14 @@ export class CreateTeamDto {
   @IsMongoId()
   companyId: string;
 
+
+  @IsMongoId()
+  createdBy: string;
+
+
+  @IsMongoId()
+  updatedBy: string;
+
   @IsString()
   teamId: string;
 

@@ -15,6 +15,10 @@ export enum NotificationType {
 
   LOW_COMPLETION = 'LOW_COMPLETION',
 
+  TASK_CREATED = 'TASK_CREATED',
+
+  TASK_UPDATED = 'TASK_UPDATED',
+
   TASK_ASSIGNED = 'TASK_ASSIGNED',
 
   TASK_COMPLETED = 'TASK_COMPLETED',
@@ -23,21 +27,29 @@ export enum NotificationType {
 
   PROJECT_CREATED = 'PROJECT_CREATED',
 
+  PROJECT_UPDATED = 'PROJECT_UPDATED',
+
   SPRINT_STARTED = 'SPRINT_STARTED',
 
+  TEAM_CREATED = 'TEAM_CREATED',
 
+   TEAM_UPDATED='TEAM_UPDATED'
 }
 
 export enum NotificationReferenceType {
   PROJECT = 'PROJECT',
 
   SPRINT = 'SPRINT',
-
+ 
   TASK = 'TASK',
 
   RISK = 'RISK',
 
   ISSUE = 'ISSUE',
+
+  TEAM = 'TEAM',
+
+ 
 }
 
 export enum NotificationPriority {
@@ -85,31 +97,24 @@ export class Notification {
   })
   userId: Types.ObjectId;
 
-
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false,
     index: true,
   })
   createdBy: Types.ObjectId;
 
-
   @Prop({
     type: Types.ObjectId,
     ref: 'Project',
-    required: true,
+    required: false,
     index: true,
   })
   projectId: Types.ObjectId;
 
-
-
-  @Prop({
-  })
+  @Prop({})
   referenceId?: string;
-
-
 
   @Prop({
     required: true,
@@ -141,13 +146,10 @@ export class Notification {
   })
   isDeleted: boolean;
 
-
   @Prop({
     enum: NotificationReferenceType,
   })
   referenceType?: NotificationReferenceType;
-
-  
 
   @Prop({
     default: false,
@@ -169,13 +171,12 @@ export class Notification {
   })
   priority: NotificationPriority;
 
-
   @Prop({
     required: false,
     trim: true,
     maxlength: 1000,
   })
-  actionUrl: string
+  actionUrl: string;
 
   @Prop({
     enum: NotificationSource,

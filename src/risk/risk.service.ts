@@ -18,6 +18,10 @@ import { SearchRiskDto } from './dto/search-risk.dto';
 
 import { RiskCounter, RiskCounterDocument } from './schemas/counter.schema';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { RiskCreatedEvent } from './events/risk-created.event';
+import { RiskUpdatedEvent } from './events/risk-updated.event';
+
 @Injectable()
 export class RiskService {
   constructor(
@@ -25,6 +29,7 @@ export class RiskService {
     private readonly riskModel: Model<RiskDocument>,
     @InjectModel(RiskCounter.name)
     private counterModel: Model<RiskCounterDocument>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async getNextRiskId(): Promise<number> {
@@ -50,10 +55,14 @@ export class RiskService {
       throw new ConflictException('Risk ID already exists');
     }
 
-    return this.riskModel.create({
+    const risk = await this.riskModel.create({
       ...createRiskDto,
       riskId: `RISK-${nextRiskId.toString()}`,
     });
+
+    this.eventEmitter.emit('risk.created', new RiskCreatedEvent(risk));
+
+    return risk;
   }
 
   async findAll() {
@@ -289,6 +298,8 @@ export class RiskService {
     risk.status = status as RiskStatus;
 
     await risk.save();
+
+    this.eventEmitter.emit('risk.updated', new RiskUpdatedEvent(risk));
 
     return risk;
   }

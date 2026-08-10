@@ -1,7 +1,5 @@
 import { ProjectDocument } from '../schemas/project.schema';
 
 export class ProjectCreatedEvent {
-  constructor(
-    public readonly project: ProjectDocument,
-  ) {}
-} 
+  constructor(public readonly project: ProjectDocument) {}
+}

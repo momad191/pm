@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -8,7 +8,7 @@ import { Report, ReportDocument, ReportType } from './schemas/report.schema';
 
 import { CreateReportDto } from './dto/create-report.dto';
 
-import { UpdateReportDto } from './dto/update-report.dto';
+// import { UpdateReportDto } from './dto/update-report.dto';
 
 import { SearchReportDto } from './dto/search-report.dto';
 
@@ -30,6 +30,10 @@ import { Response } from 'express';
 
 import * as ExcelJS from 'exceljs';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ReportCreatedEvent } from './events/report-created.event';
+import { ReportUpdatedEvent } from './events/report-updated.event';
+
 @Injectable()
 export class ReportService {
   constructor(
@@ -45,6 +49,7 @@ export class ReportService {
     private readonly issueModel: Model<IssueDocument>,
     @InjectModel(Team.name)
     private readonly teamModel: Model<TeamDocument>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // generateProjectStatus()
@@ -114,7 +119,7 @@ export class ReportService {
       generatedAt: new Date(),
     };
 
-    return this.reportModel.create({
+    const report = await this.reportModel.create({
       reportType: ReportType.PROJECT_STATUS,
 
       projectId: dto.projectId,
@@ -129,6 +134,10 @@ export class ReportService {
 
       content,
     });
+
+    this.eventEmitter.emit('report.created', new ReportCreatedEvent(report));
+
+    return report;
   }
 
   // generateRiskReport()
@@ -193,7 +202,7 @@ export class ReportService {
       generatedAt: new Date(),
     };
 
-    return this.reportModel.create({
+    const report = await this.reportModel.create({
       companyId,
 
       reportType: ReportType.RISK_REPORT,
@@ -208,6 +217,10 @@ export class ReportService {
 
       content,
     });
+
+    this.eventEmitter.emit('report.created', new ReportCreatedEvent(report));
+
+    return report;
   }
 
   // generateDelayedTaskReport()
@@ -283,7 +296,7 @@ export class ReportService {
       generatedAt: new Date(),
     };
 
-    return this.reportModel.create({
+    const report = await this.reportModel.create({
       companyId: dto.companyId,
 
       reportType: ReportType.DELAY_REPORT,
@@ -296,6 +309,10 @@ export class ReportService {
 
       content,
     });
+
+    this.eventEmitter.emit('report.created', new ReportCreatedEvent(report));
+
+    return report;
   }
 
   // generateTeamPerformance()
@@ -466,7 +483,7 @@ export class ReportService {
     // -----------------------------------------
     // Save report
     // -----------------------------------------
-    return this.reportModel.create({
+    const report = await this.reportModel.create({
       companyId: dto.companyId,
 
       reportType: ReportType.TEAM_PERFORMANCE,
@@ -479,6 +496,10 @@ export class ReportService {
 
       content,
     });
+
+    this.eventEmitter.emit('report.created', new ReportCreatedEvent(report));
+
+    return report;
   }
 
   // generateIssueReport()
@@ -651,7 +672,7 @@ export class ReportService {
     // -----------------------------------------
     // Save report
     // -----------------------------------------
-    return this.reportModel.create({
+    const report = await this.reportModel.create({
       companyId: dto.companyId,
 
       reportType: ReportType.ISSUE_REPORT,
@@ -664,6 +685,10 @@ export class ReportService {
 
       content,
     });
+
+    this.eventEmitter.emit('report.created', new ReportCreatedEvent(report));
+
+    return report;
   }
 
   // findAll()
@@ -946,6 +971,8 @@ export class ReportService {
     report.regeneratedAt = new Date();
 
     await report.save();
+
+    this.eventEmitter.emit('report.updated', new ReportUpdatedEvent(report));
 
     return {
       success: true,

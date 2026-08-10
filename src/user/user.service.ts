@@ -18,11 +18,17 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SearchUserDto } from './dto/search-user.dto';
 
+
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserCreatedEvent } from './events/user-created.event';
+import { UserUpdatedEvent } from './events/user-updated.event';
+
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    private readonly eventEmitter: EventEmitter2,
   ) { }
 
   async create(
@@ -53,6 +59,8 @@ export class UserService {
 
     const { password, ...userObject } =
       user.toObject();
+
+      this.eventEmitter.emit('user.created', new UserCreatedEvent(user));
 
     return userObject;
   }
@@ -110,6 +118,8 @@ export class UserService {
     const { password: _password, ...userObject } =
       user.toObject();
 
+      this.eventEmitter.emit('user.updated', new UserUpdatedEvent(user));
+
     return userObject;
   }
 
@@ -129,6 +139,8 @@ export class UserService {
       !user.isActive;
 
     await user.save();
+
+     this.eventEmitter.emit('user.updated', new UserUpdatedEvent(user));
 
     return user;
   }

@@ -115,12 +115,10 @@ export class TaskController {
     @Param('id')
     id: string,
 
-    @Body()
-    body: {
-      status: string;
-    },
+   @Body()
+    updateTaskDto: UpdateTaskDto,
   ) {
-    return this.taskService.updateStatus(id, body.status);
+    return this.taskService.updateStatus(id, updateTaskDto);
   }
 
   /**

@@ -16,6 +16,11 @@ import { SearchTeamDto } from './dto/search-team.dto';
 
 import { TeamCounter, TeamCounterDocument } from './schemas/counter.schema';
 
+
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { TeamCreatedEvent } from './events/team-created.event';
+import { TeamUpdatedEvent } from './events/team-updated.event';
+
 @Injectable()
 export class TeamService {
   constructor(
@@ -23,6 +28,7 @@ export class TeamService {
     private readonly teamModel: Model<TeamDocument>,
     @InjectModel(TeamCounter.name)
     private counterModel: Model<TeamCounterDocument>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async getNextTeamId(): Promise<number> {
@@ -41,10 +47,16 @@ export class TeamService {
 
   async create(dto: CreateTeamDto) {
     const nextTeamId = await this.getNextTeamId();
-    return await this.teamModel.create({
+
+    const team = await this.teamModel.create({
       ...dto,
       teamId: `TEAM-${nextTeamId.toString()}`,
     });
+
+
+    this.eventEmitter.emit('team.created', new TeamCreatedEvent(team));
+
+    return team;
   }
 
   async findAll() {
@@ -196,6 +208,8 @@ export class TeamService {
       throw new NotFoundException('Team not found');
     }
 
+    this.eventEmitter.emit('team.updated', new TeamUpdatedEvent(team));
+
     return team;
   }
 
@@ -219,6 +233,8 @@ export class TeamService {
 
     await team.save();
 
+    this.eventEmitter.emit('team.updated', new TeamUpdatedEvent(team));
+
     return team.populate('members');
   }
 
@@ -237,6 +253,8 @@ export class TeamService {
     );
 
     await team.save();
+
+    this.eventEmitter.emit('team.updated', new TeamUpdatedEvent(team));
 
     return team.populate('members');
   }
@@ -259,6 +277,8 @@ export class TeamService {
       throw new NotFoundException('Team not found');
     }
 
+    this.eventEmitter.emit('team.updated', new TeamUpdatedEvent(team));
+
     return team.populate('teamLead');
   }
 
@@ -280,6 +300,9 @@ export class TeamService {
       throw new NotFoundException('Team not found');
     }
 
+    this.eventEmitter.emit('team.updated', new TeamUpdatedEvent(team));
+
+    
     return team;
   }
 

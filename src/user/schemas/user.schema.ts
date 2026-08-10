@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Document, Types } from 'mongoose';
 
-export type UserDocument = User & Document; 
+export type UserDocument = User & Document;
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -11,7 +11,7 @@ export enum UserRole {
   TEAM_MEMBER = 'TEAM_MEMBER',
   QA_ENGINEER = 'QA_ENGINEER',
 }
- 
+
 @Schema({
   timestamps: true,
 })
@@ -54,7 +54,6 @@ export class User {
     lowercase: true,
   })
   username: string;
-
 
   @Prop({
     required: true,

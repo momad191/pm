@@ -18,6 +18,10 @@ import { SearchIssueDto } from './dto/search-issue.dto';
 
 import { IssueCounter, IssueCounterDocument } from './schemas/counter.schema';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { IssueCreatedEvent } from './events/issue-created.event';
+import { IssueUpdatedEvent } from './events/issue-updated.event';
+
 @Injectable()
 export class IssueService {
   constructor(
@@ -25,6 +29,7 @@ export class IssueService {
     private readonly issueModel: Model<IssueDocument>,
     @InjectModel(IssueCounter.name)
     private readonly counterModel: Model<IssueCounterDocument>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async getNextIssueId(): Promise<number> {
@@ -40,10 +45,14 @@ export class IssueService {
   async create(createIssueDto: CreateIssueDto) {
     const nextIssueId = await this.getNextIssueId();
 
-    return this.issueModel.create({
+    const issue = await this.issueModel.create({
       ...createIssueDto,
       issueId: `ISSUE-${nextIssueId.toString()}`,
     });
+
+    this.eventEmitter.emit('issue.created', new IssueCreatedEvent(issue));
+
+    return issue;
   }
 
   async findAll() {
@@ -103,6 +112,8 @@ export class IssueService {
     if (!issue) {
       throw new NotFoundException('Issue not found');
     }
+
+    this.eventEmitter.emit('issue.updated', new IssueUpdatedEvent(issue));
 
     return issue;
   }

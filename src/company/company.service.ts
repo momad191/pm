@@ -25,6 +25,9 @@ import * as bcrypt from 'bcrypt';
 
 import { EmailService } from '../email/email.service';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CompanyCreatedEvent } from './events/company-created.event';
+import { CompanyUpdatedEvent } from './events/company-updated.event';
 
 @Injectable()
 export class CompanyService {
@@ -38,7 +41,7 @@ export class CompanyService {
 
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
-
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async getNextCompanyId(): Promise<number> {
@@ -46,11 +49,10 @@ export class CompanyService {
       { name: 'companyId' },
       { $inc: { seq: 1 } },
 
-      { 
+      {
         returnDocument: 'after',
-        upsert: true 
+        upsert: true,
       },
-
     );
 
     return counter.seq;
@@ -62,7 +64,7 @@ export class CompanyService {
 
   async create(dto: CreateCompanyDto) {
     const nextCompanyId = await this.getNextCompanyId();
- 
+
     const exists = await this.companyModel.findOne({
       $or: [
         {
@@ -93,39 +95,38 @@ export class CompanyService {
       dto.password,
       10,
     );
-  
-   
-    const createdUser = await this.userModel.create(
-      {
-        companyId: createdCompany._id.toString(),
-        firstName:dto.managerFirstName,
-        lastName:dto.managerLastName,
-        username: dto.email, 
-        email: dto.email,
-        password: hashedPassword,
-        role: UserRole.ADMIN,
-        isActive: false,
-      }
-    )
 
- 
+    const createdUser = await this.userModel.create({
+      companyId: createdCompany._id.toString(),
+      firstName: dto.managerFirstName,
+      lastName: dto.managerLastName,
+      username: dto.email,
+      email: dto.email,
+      password: hashedPassword,
+      role: UserRole.ADMIN,
+      isActive: false,
+    });
+
     await createdUser.save();
 
     const html = `
     <p>Hello</p>
-    <p>Your account created Successfully this is your id ${createdCompany._id}</p>
-    <p> Activate you account by click here <a href=http://localhost:3000/complete-registration/${createdUser._id}"> </a></p>
+    <p>Your account created Successfully this is your id ${createdCompany._id.toString()}</p>
+    <p> Activate you account by click here <a href=http://localhost:3000/complete-registration/${createdUser._id.toString()}> </a></p>
   `;
 
-
-      await this.emailService.sendToHrManager(
+    await this.emailService.sendToHrManager(
       createdCompany.email,
       `Your Account Created Successfully`,
       html,
     );
 
-    return createdCompany
+    this.eventEmitter.emit(
+      'company.created',
+      new CompanyCreatedEvent(createdCompany),
+    );
 
+    return createdCompany;
   }
 
   // ---------------------------------------------------------
@@ -296,13 +297,15 @@ export class CompanyService {
       },
       dto,
       {
-        returnDocument: 'after'
+        returnDocument: 'after',
       },
     );
 
     if (!company) {
       throw new NotFoundException('Company not found.');
     }
+
+    this.eventEmitter.emit('company.updated', new CompanyUpdatedEvent(company));
 
     return company;
   }
@@ -321,7 +324,7 @@ export class CompanyService {
         status,
       },
       {
-        returnDocument: 'after'
+        returnDocument: 'after',
       },
     );
 
@@ -346,7 +349,7 @@ export class CompanyService {
         logo,
       },
       {
-        returnDocument: 'after'
+        returnDocument: 'after',
       },
     );
 
@@ -371,7 +374,7 @@ export class CompanyService {
         isDeleted: true,
       },
       {
-        returnDocument: 'after'
+        returnDocument: 'after',
       },
     );
 

@@ -11,7 +11,16 @@ import {
   NotificationSchema,
 } from './schemas/notification.schema';
 
-import { ProjectCreatedListener } from './listeners/project-created.listener';
+import { ProjectCreatedListener } from './listeners/project/project-created.listener';
+import { ProjectUpdatedListener } from './listeners/project/project-updated.listener';
+
+import { TaskCreatedListener } from './listeners/task/task-created.listener';
+import { TaskUpdatedListener } from './listeners/task/task-updated.listener';
+
+import { TeamCreatedListener } from './listeners/team/team-created.listener';
+import { TeamUpdatedListener } from './listeners/team/team-updated.listener';
+
+
 
 @Module({
   imports: [
@@ -22,11 +31,19 @@ import { ProjectCreatedListener } from './listeners/project-created.listener';
       },
     ]),
   ],
- 
+
   controllers: [NotificationController],
 
-  providers: [NotificationService, ProjectCreatedListener,],
+  providers: [
+    NotificationService,
+    ProjectCreatedListener,
+    ProjectUpdatedListener,
+    TaskCreatedListener,
+    TaskUpdatedListener,
+    TeamCreatedListener,
+    TeamUpdatedListener
+  ],
 
   exports: [NotificationService],
 })
-export class NotificationModule {}
+export class NotificationModule { }
