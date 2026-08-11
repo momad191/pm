@@ -14,6 +14,12 @@ export class CreateIssueDto {
   @IsMongoId()
   companyId: string;
 
+  @IsMongoId()
+  createdBy?: string;
+
+  @IsMongoId()
+  updatedBy?: string;
+
   @IsString()
   issueId: string;
 

@@ -12,6 +12,13 @@ export class CreateSprintDto {
   @IsMongoId()
   companyId: string;
 
+
+  @IsMongoId()
+  createdBy?: string;
+
+  @IsMongoId()
+  updatedBy?: string;
+
   @IsString()
   sprintId: string;
 

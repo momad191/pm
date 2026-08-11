@@ -24,6 +24,25 @@ export class Sprint {
   })
   companyId: Types.ObjectId;
 
+
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: false,
+  })
+  createdBy: Types.ObjectId;
+
+
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: false,
+  })
+  updatedBy: Types.ObjectId;
+
+
   @Prop({
     required: true,
     unique: true,

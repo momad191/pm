@@ -13,9 +13,12 @@ export class CreateTaskDto {
   @IsMongoId()
   companyId: string;
 
+  @IsMongoId()
+  createdBy?: string;
+
 
   @IsMongoId()
-  updatedBy: string;
+  updatedBy?: string;
 
   @IsOptional()
   @IsString()

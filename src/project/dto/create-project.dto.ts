@@ -13,9 +13,13 @@ export class CreateProjectDto {
   companyId: string;
 
   @IsMongoId()
-  createdBy: string;
+  createdBy?: string;
 
-  
+
+  @IsMongoId()
+  updatedBy?: string;
+
+
   @IsString()
   name: string;
 

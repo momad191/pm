@@ -25,9 +25,17 @@ export class Project {
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false,
   })
   createdBy: Types.ObjectId;
+
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: false,
+  })
+  updatedBy: Types.ObjectId;
 
   @Prop({
     type: String,
