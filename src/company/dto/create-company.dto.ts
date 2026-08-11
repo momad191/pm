@@ -6,11 +6,21 @@ import {
   IsUrl,
   MaxLength,
   MinLength,
+  IsMongoId
 } from 'class-validator';
 
 import { CompanyStatus } from '../schemas/company.schema';
 
 export class CreateCompanyDto {
+
+  @IsMongoId()
+  createdBy?: string;
+
+
+  @IsMongoId()
+  updatedBy?: string;
+
+
   @IsString()
   @MinLength(2)
   @MaxLength(50)
@@ -21,7 +31,7 @@ export class CreateCompanyDto {
   @MaxLength(150)
   companyName: string;
 
- 
+
   @IsString()
   @MaxLength(500)
   legalName?: string;

@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Document } from 'mongoose';
+ 
+import { Document, Types } from 'mongoose';
 
 export type CompanyDocument = Company & Document;
 
@@ -26,6 +27,22 @@ export enum CompanyStatus {
   timestamps: true,
 })
 export class Company {
+
+   @Prop({
+      type: Types.ObjectId,
+      ref: 'User',
+      required: false,
+    })
+    createdBy: Types.ObjectId;
+  
+    @Prop({
+      type: Types.ObjectId,
+      ref: 'User',
+      required: false,
+    })
+    updatedBy: Types.ObjectId;
+
+
   @Prop({
     required: true,
     unique: true,
@@ -212,7 +229,7 @@ export class Company {
   @Prop()
   lastLogin: Date;
 }
-
+ 
 export const CompanySchema = SchemaFactory.createForClass(Company);
 
 // CompanySchema.index({

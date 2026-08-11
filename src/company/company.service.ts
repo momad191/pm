@@ -290,6 +290,7 @@ export class CompanyService {
   // ---------------------------------------------------------
 
   async update(id: string, dto: UpdateCompanyDto) {
+
     const company = await this.companyModel.findOneAndUpdate(
       {
         _id: id,
@@ -314,15 +315,14 @@ export class CompanyService {
   // Change Status
   // ---------------------------------------------------------
 
-  async changeStatus(id: string, status: string) {
+  async changeStatus(id: string, dto: UpdateCompanyDto) {
+
     const company = await this.companyModel.findOneAndUpdate(
       {
         _id: id,
         isDeleted: false,
       },
-      {
-        status,
-      },
+      dto,
       {
         returnDocument: 'after',
       },
@@ -331,6 +331,8 @@ export class CompanyService {
     if (!company) {
       throw new NotFoundException('Company not found.');
     }
+
+     this.eventEmitter.emit('company.updated', new CompanyUpdatedEvent(company));
 
     return company;
   }
@@ -339,15 +341,15 @@ export class CompanyService {
   // Update Logo
   // ---------------------------------------------------------
 
-  async updateLogo(id: string, logo: string) {
+  async updateLogo(id: string, dto: UpdateCompanyDto) {
+
+
     const company = await this.companyModel.findOneAndUpdate(
       {
         _id: id,
         isDeleted: false,
       },
-      {
-        logo,
-      },
+      dto,
       {
         returnDocument: 'after',
       },
@@ -356,6 +358,9 @@ export class CompanyService {
     if (!company) {
       throw new NotFoundException('Company not found.');
     }
+
+
+     this.eventEmitter.emit('company.updated', new CompanyUpdatedEvent(company));
 
     return company;
   }

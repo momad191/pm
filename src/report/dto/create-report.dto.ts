@@ -5,6 +5,12 @@ export class CreateReportDto {
   projectId: string;
 
   @IsMongoId()
+  createdBy?: string;
+
+  @IsMongoId()
+  updatedBy?: string;
+
+  @IsMongoId()
   companyId: string;
 
   @IsMongoId()

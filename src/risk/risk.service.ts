@@ -30,7 +30,7 @@ export class RiskService {
     @InjectModel(RiskCounter.name)
     private counterModel: Model<RiskCounterDocument>,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async getNextRiskId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
@@ -60,7 +60,23 @@ export class RiskService {
       riskId: `RISK-${nextRiskId.toString()}`,
     });
 
-    this.eventEmitter.emit('risk.created', new RiskCreatedEvent(risk));
+    let current_risk: any
+
+    current_risk = await this.riskModel.findById(risk._id).populate('projectId').populate('taskId')
+
+
+    const projectManagerId = current_risk?.projectId?.managerId
+
+    const taskAssigneeId = current_risk?.taskId?.assignedTo
+
+
+
+    // console.log("--------------------------", projectManagerId)
+    // console.log("--------------------------", taskAssigneeId)
+    // console.log("--------------------------", current)
+
+    this.eventEmitter.emit('risk.created', new RiskCreatedEvent(risk, projectManagerId, taskAssigneeId));
+
 
     return risk;
   }
@@ -114,6 +130,8 @@ export class RiskService {
     if (!risk) {
       throw new NotFoundException('Risk not found');
     }
+
+    this.eventEmitter.emit('risk.updated', new RiskUpdatedEvent(risk));
 
     return risk;
   }
@@ -287,17 +305,31 @@ export class RiskService {
   async updateStatus(
     id: string,
 
-    status: string,
+    updateRiskDto: UpdateRiskDto,
   ) {
-    const risk = await this.riskModel.findById(id);
+
+
+
+
+    const risk = await this.riskModel.findByIdAndUpdate(
+      id,
+
+      updateRiskDto,
+
+      {
+        returnDocument: 'after',
+      },
+    );
+
+
+
 
     if (!risk) {
       throw new NotFoundException('Risk not found');
     }
 
-    risk.status = status as RiskStatus;
 
-    await risk.save();
+
 
     this.eventEmitter.emit('risk.updated', new RiskUpdatedEvent(risk));
 

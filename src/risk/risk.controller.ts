@@ -120,13 +120,11 @@ export class RiskController {
     id: string,
 
     @Body()
-    body: {
-      status: string;
-    },
+    updateRiskDto: UpdateRiskDto,
   ) {
     return this.riskService.updateStatus(
       id,
-      body.status,
+      updateRiskDto,
     );
   }
 

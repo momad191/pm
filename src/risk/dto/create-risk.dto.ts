@@ -6,6 +6,14 @@ export class CreateRiskDto {
   @IsMongoId()
   companyId: string;
 
+
+  @IsMongoId()
+  createdBy: string;
+
+
+  @IsMongoId()
+  updatedBy: string;
+
   @IsString()
   riskId: string;
 

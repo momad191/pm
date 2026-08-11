@@ -5,7 +5,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { ProjectCreatedEvent } from '../../../project/events/project-created.event';
  
 import { NotificationService } from '../../notification.service';
-
+ 
 import {
   NotificationPriority,
   NotificationReferenceType,

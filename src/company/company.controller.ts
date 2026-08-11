@@ -100,10 +100,10 @@ export class CompanyController {
     @Param('id')
     id: string,
 
-    @Body('status')
-    status: string,
+     @Body()
+    updateCompanyDto: UpdateCompanyDto,
   ) {
-    return this.companyService.changeStatus(id, status);
+    return this.companyService.changeStatus(id, updateCompanyDto);
   }
 
   /**
@@ -117,10 +117,10 @@ export class CompanyController {
     @Param('id')
     id: string,
 
-    @Body('logo')
-    logo: string,
+     @Body()
+    updateCompanyDto: UpdateCompanyDto,
   ) {
-    return this.companyService.updateLogo(id, logo);
+    return this.companyService.updateLogo(id, updateCompanyDto);
   }
 
   /**

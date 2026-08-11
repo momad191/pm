@@ -15,6 +15,8 @@ export class CreateNotificationDto {
   @IsMongoId()
   userId: string;
 
+ 
+
   @IsString()
   title: string;
 

@@ -33,7 +33,23 @@ export enum NotificationType {
 
   TEAM_CREATED = 'TEAM_CREATED',
 
-   TEAM_UPDATED='TEAM_UPDATED'
+   TEAM_UPDATED='TEAM_UPDATED',
+
+   RISK_CREATED= 'RISK_CREATED',
+
+   RISK_UPDATED= 'RISK_UPDATED',
+
+   USER_CREATED='USER_CREATED',
+
+   USER_UPDATED= 'USER_UPDATED',
+
+   COMPANY_CREATED='COMPANY_CREATED',
+
+   COMPANY_UPDATED='COMPANY_UPDATED',
+
+   REPORT_CREATED='REPORT_CREATED',
+
+   REPORT_UPDATED='REPORT_UPDATED'
 }
 
 export enum NotificationReferenceType {
@@ -49,7 +65,11 @@ export enum NotificationReferenceType {
 
   TEAM = 'TEAM',
 
- 
+  USER= 'USER',
+
+  COMPANY='COMPANY',
+
+  REPORT='REPORT'
 }
 
 export enum NotificationPriority {

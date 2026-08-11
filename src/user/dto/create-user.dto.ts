@@ -13,6 +13,14 @@ export class CreateUserDto {
   @IsMongoId()
   companyId: string;
 
+
+  @IsMongoId()
+  createdBy?: string;
+
+
+  @IsMongoId()
+  updatedBy?: string;
+
   @IsString()
   teamId: string;
 

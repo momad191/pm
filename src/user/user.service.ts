@@ -55,6 +55,7 @@ export class UserService {
       await this.userModel.create({
         ...createUserDto,
         password: hashedPassword,
+        username: createUserDto.email
       });
 
     const { password, ...userObject } =
