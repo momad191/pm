@@ -11,6 +11,12 @@ export class SearchCompanyDto {
   @IsString()
   companyId?: string;
 
+
+  @IsOptional()
+  @IsString()
+  ref?: string;
+
+
   @IsOptional()
   @IsString()
   companyName?: string;

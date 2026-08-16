@@ -12,6 +12,7 @@ export class CreateNotificationDto {
   @IsMongoId()
   companyId: string;
 
+  @IsOptional()
   @IsMongoId()
   userId: string;
 

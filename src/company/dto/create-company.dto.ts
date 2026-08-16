@@ -14,6 +14,9 @@ import { CompanyStatus } from '../schemas/company.schema';
 export class CreateCompanyDto {
 
   @IsMongoId()
+  ref?: string;
+
+  @IsMongoId()
   createdBy?: string;
 
 

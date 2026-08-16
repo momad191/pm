@@ -112,7 +112,7 @@ export class Notification {
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false,
     index: true,
   })
   userId: Types.ObjectId;

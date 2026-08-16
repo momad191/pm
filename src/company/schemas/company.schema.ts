@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
- 
+
 import { Document, Types } from 'mongoose';
 
 export type CompanyDocument = Company & Document;
@@ -28,19 +28,27 @@ export enum CompanyStatus {
 })
 export class Company {
 
-   @Prop({
-      type: Types.ObjectId,
-      ref: 'User',
-      required: false,
-    })
-    createdBy: Types.ObjectId;
-  
-    @Prop({
-      type: Types.ObjectId,
-      ref: 'User',
-      required: false,
-    })
-    updatedBy: Types.ObjectId;
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: false,
+  })
+  ref: Types.ObjectId;
+
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: false,
+  })
+  createdBy: Types.ObjectId;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    required: false,
+  })
+  updatedBy: Types.ObjectId;
 
 
   @Prop({
@@ -73,7 +81,7 @@ export class Company {
     trim: true,
     maxlength: 200,
   })
-  managerFirstName:string;
+  managerFirstName: string;
 
 
   @Prop({
@@ -81,7 +89,7 @@ export class Company {
     trim: true,
     maxlength: 200,
   })
-  managerLastName:string;
+  managerLastName: string;
 
   @Prop({
     trim: true,
@@ -178,30 +186,35 @@ export class Company {
   @Prop({
     trim: true,
     maxlength: 100,
+    required:false 
   })
   commercialRegistration: string;
 
   @Prop({
     trim: true,
     maxlength: 100,
+    required:false 
   })
   taxNumber: string;
 
   @Prop({
     trim: true,
     maxlength: 100,
+
   })
   ownerName: string;
 
   @Prop({
     lowercase: true,
     trim: true,
+    required:false
   })
   ownerEmail: string;
 
   @Prop({
     trim: true,
     maxlength: 20,
+    required:false
   })
   ownerPhone: string;
 
@@ -229,7 +242,7 @@ export class Company {
   @Prop()
   lastLogin: Date;
 }
- 
+
 export const CompanySchema = SchemaFactory.createForClass(Company);
 
 // CompanySchema.index({
