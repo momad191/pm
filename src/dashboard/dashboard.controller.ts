@@ -1,107 +1,161 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+} from '@nestjs/common';
 
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
 export class DashboardController {
-  constructor(private readonly dashboardService: DashboardService) {}
+  constructor(
+    private readonly dashboardService: DashboardService,
+  ) {}
 
   // =====================================================
   // Dashboard Overview
+  // GET /dashboard/overview?companyId=...
   // =====================================================
 
   @Get('overview')
-  getOverview() {
-    return this.dashboardService.getOverview();
+  getOverview(
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getOverview(companyId);
   }
 
   // =====================================================
   // Project Health Dashboard
+  // GET /dashboard/project-health?companyId=...
   // =====================================================
 
   @Get('project-health')
-  getProjectHealth() {
-    return this.dashboardService.getProjectHealth();
+  getProjectHealth(
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getProjectHealth(companyId);
   }
 
   // =====================================================
   // Team Workload Dashboard
+  // GET /dashboard/workload?companyId=...
   // =====================================================
 
   @Get('workload')
-  getWorkload() {
-    return this.dashboardService.getWorkload();
+  getWorkload(
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getWorkload(companyId);
   }
 
   // =====================================================
   // Executive Dashboard
+  // GET /dashboard/executive?companyId=...
   // =====================================================
 
   @Get('executive')
-  getExecutiveDashboard() {
-    return this.dashboardService.getExecutiveDashboard();
+  getExecutiveDashboard(
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getExecutiveDashboard(
+      companyId,
+    );
   }
 
   // =====================================================
   // Dashboard Charts
+  // GET /dashboard/charts?companyId=...
   // =====================================================
 
   @Get('charts')
-  getCharts() {
-    return this.dashboardService.getCharts();
+  getCharts(
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getCharts(companyId);
   }
 
   // =====================================================
   // Single Project Dashboard
+  // GET /dashboard/project/:id?companyId=...
   // =====================================================
 
   @Get('project/:id')
-  getProjectDashboard(@Param('id') id: string) {
-    return this.dashboardService.getProjectDashboard(id);
+  getProjectDashboard(
+    @Param('id') id: string,
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getProjectDashboard(
+      id,
+      companyId,
+    );
   }
 
   // =====================================================
   // Manager Dashboard
+  // GET /dashboard/manager/:managerId?companyId=...
   // =====================================================
 
   @Get('manager/:managerId')
-  getManagerDashboard(@Param('managerId') managerId: string) {
-    return this.dashboardService.getManagerDashboard(managerId);
+  getManagerDashboard(
+    @Param('managerId') managerId: string,
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getManagerDashboard(
+      managerId,
+      companyId,
+    );
   }
 
   // =====================================================
   // Team Dashboard
+  // GET /dashboard/team/:userId?companyId=...
   // =====================================================
 
   @Get('team/:userId')
-  getTeamDashboard(@Param('userId') userId: string) {
-    return this.dashboardService.getTeamDashboard(userId);
+  getTeamDashboard(
+    @Param('userId') userId: string,
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getTeamDashboard(
+      userId,
+      companyId,
+    );
   }
 
   // =====================================================
   // Risk Analysis Dashboard
+  // GET /dashboard/risk-analysis?companyId=...
   // =====================================================
 
   @Get('risk-analysis')
-  getRiskAnalysis() {
-    return this.dashboardService.getRiskAnalysis();
+  getRiskAnalysis(
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getRiskAnalysis(companyId);
   }
 
   // =====================================================
   // Performance Dashboard
+  // GET /dashboard/performance?companyId=...
   // =====================================================
 
   @Get('performance')
-  getPerformance() {
-    return this.dashboardService.getPerformance();
+  getPerformance(
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getPerformance(companyId);
   }
 
   // =====================================================
   // Trends Dashboard
+  // GET /dashboard/trends?companyId=...
   // =====================================================
 
   @Get('trends')
-  getTrends() {
-    return this.dashboardService.getTrends();
+  getTrends(
+    @Query('companyId') companyId: string,
+  ) {
+    return this.dashboardService.getTrends(companyId);
   }
 }
