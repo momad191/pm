@@ -67,6 +67,25 @@ export class Company {
   })
   companyName: string;
 
+ 
+  @Prop({
+    required: true,
+    trim: true,
+    maxlength: 150,
+    index: true,
+  })
+  companyNameArabic: string;
+
+
+  @Prop({
+    required: true,
+    trim: true,
+    maxlength: 150,
+    index: true,
+  })
+  language: string;
+
+
   @Prop({
     required: true,
     trim: true,
@@ -186,14 +205,14 @@ export class Company {
   @Prop({
     trim: true,
     maxlength: 100,
-    required:false 
+    required: false
   })
   commercialRegistration: string;
 
   @Prop({
     trim: true,
     maxlength: 100,
-    required:false 
+    required: false
   })
   taxNumber: string;
 
@@ -207,14 +226,14 @@ export class Company {
   @Prop({
     lowercase: true,
     trim: true,
-    required:false
+    required: false
   })
   ownerEmail: string;
 
   @Prop({
     trim: true,
     maxlength: 20,
-    required:false
+    required: false
   })
   ownerPhone: string;
 

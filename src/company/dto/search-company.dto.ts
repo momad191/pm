@@ -21,6 +21,11 @@ export class SearchCompanyDto {
   @IsString()
   companyName?: string;
 
+ @IsOptional()
+  @IsString()
+  companyNameArabic?: string;
+  
+
   @IsOptional()
   @IsString()
   industry?: string;

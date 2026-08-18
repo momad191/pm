@@ -42,7 +42,7 @@ export class CompanyService {
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async getNextCompanyId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
@@ -152,6 +152,7 @@ export class CompanyService {
       search,
       companyId,
       companyName,
+      companyNameArabic,
       industry,
       country,
       city,
@@ -178,6 +179,12 @@ export class CompanyService {
         },
         {
           companyName: {
+            $regex: keyword,
+            $options: 'i',
+          },
+        },
+        {
+          companyNameArabic: {
             $regex: keyword,
             $options: 'i',
           },
@@ -220,6 +227,14 @@ export class CompanyService {
     if (companyName?.trim()) {
       filter.companyName = {
         $regex: this.escapeRegex(companyName.trim()),
+        $options: 'i',
+      };
+    }
+
+
+    if (companyNameArabic?.trim()) {
+      filter.companyNameArabic = {
+        $regex: this.escapeRegex(companyNameArabic.trim()),
         $options: 'i',
       };
     }
@@ -332,7 +347,7 @@ export class CompanyService {
       throw new NotFoundException('Company not found.');
     }
 
-     this.eventEmitter.emit('company.updated', new CompanyUpdatedEvent(company));
+    this.eventEmitter.emit('company.updated', new CompanyUpdatedEvent(company));
 
     return company;
   }
@@ -360,7 +375,7 @@ export class CompanyService {
     }
 
 
-     this.eventEmitter.emit('company.updated', new CompanyUpdatedEvent(company));
+    this.eventEmitter.emit('company.updated', new CompanyUpdatedEvent(company));
 
     return company;
   }

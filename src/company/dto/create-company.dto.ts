@@ -36,6 +36,19 @@ export class CreateCompanyDto {
 
 
   @IsString()
+  @MinLength(2)
+  @MaxLength(150)
+  companyNameArabic?: string;
+ 
+ 
+  @IsString()
+  @MinLength(2)
+  @MaxLength(150)
+  language?: string;
+
+
+
+  @IsString()
   @MaxLength(500)
   legalName?: string;
 
