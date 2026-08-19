@@ -13,6 +13,10 @@ import { CompanyStatus } from '../schemas/company.schema';
 
 export class CreateCompanyDto {
 
+  @IsOptional()
+  @IsMongoId()
+  subscriptionId?: string;
+
   @IsMongoId()
   ref?: string;
 
@@ -39,8 +43,8 @@ export class CreateCompanyDto {
   @MinLength(2)
   @MaxLength(150)
   companyNameArabic?: string;
- 
- 
+
+
   @IsString()
   @MinLength(2)
   @MaxLength(150)

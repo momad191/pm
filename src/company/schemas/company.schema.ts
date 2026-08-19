@@ -14,7 +14,7 @@ export enum SubscriptionPlan {
 
   ENTERPRISE = 'ENTERPRISE',
 }
-
+ 
 export enum CompanyStatus {
   ACTIVE = 'ACTIVE',
 
@@ -22,12 +22,20 @@ export enum CompanyStatus {
 
   SUSPENDED = 'SUSPENDED',
 }
-
+  
 @Schema({
   timestamps: true,
-})
+}) 
 export class Company {
 
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Subscription',
+    required: false,
+  })
+  subscriptionId: Types.ObjectId;
+ 
+ 
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
@@ -67,7 +75,7 @@ export class Company {
   })
   companyName: string;
 
- 
+
   @Prop({
     required: true,
     trim: true,

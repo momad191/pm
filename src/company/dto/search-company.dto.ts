@@ -11,6 +11,11 @@ export class SearchCompanyDto {
   @IsString()
   companyId?: string;
 
+  @IsOptional()
+  @IsString()
+  subscriptionId?: string;
+  
+
 
   @IsOptional()
   @IsString()

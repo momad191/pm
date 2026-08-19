@@ -138,6 +138,7 @@ export class CompanyService {
       .find({
         isDeleted: false,
       })
+      .populate('subscriptionId')
       .sort({
         createdAt: -1,
       });
@@ -151,6 +152,7 @@ export class CompanyService {
     const {
       search,
       companyId,
+      subscriptionId,
       companyName,
       companyNameArabic,
       industry,
@@ -224,6 +226,9 @@ export class CompanyService {
 
     if (companyId) filter.companyId = companyId;
 
+
+     if (subscriptionId) filter.subscriptionId = subscriptionId;
+
     if (companyName?.trim()) {
       filter.companyName = {
         $regex: this.escapeRegex(companyName.trim()),
@@ -266,6 +271,7 @@ export class CompanyService {
 
     const data = await this.companyModel
       .find(filter)
+      .populate('subscriptionId')
       .sort({
         [sortBy]: sortOrder === 'asc' ? 1 : -1,
       })
@@ -287,18 +293,20 @@ export class CompanyService {
   // Find One
   // ---------------------------------------------------------
 
-  async findOne(id: string) {
-    const company = await this.companyModel.findOne({
+async findOne(id: string) {
+  const company = await this.companyModel
+    .findOne({
       _id: id,
       isDeleted: false,
-    });
+    })
+    .populate('subscriptionId');
 
-    if (!company) {
-      throw new NotFoundException('Company not found.');
-    }
-
-    return company;
+  if (!company) {
+    throw new NotFoundException('Company not found.');
   }
+
+  return company;
+}
 
   // ---------------------------------------------------------
   // Update

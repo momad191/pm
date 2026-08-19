@@ -17,6 +17,7 @@ import { CompanyModule } from './company/company.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { ReportModule } from './report/report.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { SubscriptionModule } from './subscription/subscription.module';
   
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CompanyModule,
     ChatbotModule,
     ReportModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
