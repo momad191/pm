@@ -14,7 +14,7 @@ export enum SubscriptionPlan {
 
   ENTERPRISE = 'ENTERPRISE',
 }
- 
+
 export enum CompanyStatus {
   ACTIVE = 'ACTIVE',
 
@@ -22,10 +22,10 @@ export enum CompanyStatus {
 
   SUSPENDED = 'SUSPENDED',
 }
-  
+
 @Schema({
   timestamps: true,
-}) 
+})
 export class Company {
 
   @Prop({
@@ -34,8 +34,8 @@ export class Company {
     required: false,
   })
   subscriptionId: Types.ObjectId;
- 
- 
+
+
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
@@ -268,6 +268,9 @@ export class Company {
 
   @Prop()
   lastLogin: Date;
+
+  @Prop()
+  end_subscription_date?: Date
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);
