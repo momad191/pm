@@ -133,7 +133,7 @@ export class CompanyService {
   // Get All
   // ---------------------------------------------------------
 
-  async findAll() {
+  async findAll() { 
     return this.companyModel
       .find({
         isDeleted: false,
@@ -143,12 +143,12 @@ export class CompanyService {
         createdAt: -1,
       });
   }
-
+ 
   // ---------------------------------------------------------
   // Search
   // ---------------------------------------------------------
 
-  async search(query: SearchCompanyDto) {
+  async search(query: SearchCompanyDto) { 
     const {
       search,
       companyId,

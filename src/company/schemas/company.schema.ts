@@ -77,7 +77,7 @@ export class Company {
 
 
   @Prop({
-    required: true,
+    required: false,
     trim: true,
     maxlength: 150,
     index: true,
@@ -86,7 +86,7 @@ export class Company {
 
 
   @Prop({
-    required: true,
+    required: false,
     trim: true,
     maxlength: 150,
     index: true,

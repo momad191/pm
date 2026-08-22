@@ -42,7 +42,9 @@ export class SprintService {
     return counter.seq;
   }
 
-  async create(createSprintDto: CreateSprintDto) {
+  async create(createSprintDto: CreateSprintDto,companyId:string) {
+
+    companyId = companyId;
     const nextSprintId = await this.getNextSprintId();
 
     const existingSprint = await this.sprintModel.findOne({
@@ -65,10 +67,11 @@ export class SprintService {
     return sprint;
   }
 
-  async findAll() {
+  async findAll(companyId:string) {
     return this.sprintModel
       .find({
         isDeleted: false,
+        companyId:companyId
       })
       .populate('projectId')
       .sort({
@@ -76,7 +79,9 @@ export class SprintService {
       });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string,companyId:string) {
+
+    companyId = companyId;
     const sprint = await this.sprintModel.findById(id).populate('projectId');
 
     if (!sprint) {
@@ -86,7 +91,8 @@ export class SprintService {
     return sprint;
   }
 
-  async update(id: string, updateSprintDto: UpdateSprintDto) {
+  async update(id: string, updateSprintDto: UpdateSprintDto,companyId:string) {
+    companyId=companyId
     const sprint = await this.sprintModel.findByIdAndUpdate(
       id,
       updateSprintDto,
@@ -104,7 +110,8 @@ export class SprintService {
     return sprint;
   }
 
-  async remove(id: string) {
+  async remove(id: string,companyId:string) {
+    companyId=companyId;
     const sprint = await this.sprintModel.findByIdAndUpdate(
       id,
       {
@@ -125,7 +132,8 @@ export class SprintService {
     };
   }
 
-  async search(query: SearchSprintDto) {
+  async search(query: SearchSprintDto, companyId:string) {
+     
     const {
       keyword,
       projectId,
@@ -138,6 +146,7 @@ export class SprintService {
 
     const filter: any = {
       isDeleted: false,
+      companyId:companyId
     };
 
     if (keyword) {
@@ -196,11 +205,12 @@ export class SprintService {
     };
   }
 
-  async findByProject(projectId: string) {
+  async findByProject(projectId: string,companyId:string) {
     return this.sprintModel
       .find({
         projectId: projectId,
         isDeleted: false,
+        companyId:companyId
       })
       .sort({
         startDate: -1,
@@ -208,7 +218,8 @@ export class SprintService {
       .populate('projectId');
   }
 
-  async activateSprint(id: string) {
+  async activateSprint(id: string,companyId:string) {
+    companyId=companyId
     const sprint = await this.sprintModel.findById(id);
 
     if (!sprint) {
@@ -234,7 +245,8 @@ export class SprintService {
     return sprint;
   }
 
-  async completeSprint(id: string) {
+  async completeSprint(id: string,companyId:string) {
+    companyId=companyId;
     const sprint = await this.sprintModel.findById(id);
 
     if (!sprint) {

@@ -21,121 +21,140 @@ import { SearchRiskDto } from './dto/search-risk.dto';
 export class RiskController {
   constructor(
     private readonly riskService: RiskService,
-  ) {}
+  ) { }
 
   /**
    * POST /risk
    */
-  @Post()
+  @Post(':companyId')
   create(
     @Body()
     createRiskDto: CreateRiskDto,
+    @Param('companyId') companyId: string
   ) {
     return this.riskService.create(
       createRiskDto,
+      companyId
     );
   }
 
   /**
    * GET /risk
    */
-  @Get()
-  findAll() {
-    return this.riskService.findAll();
+  @Get(':companyId') 
+  findAll(@Param('companyId') companyId: string) {
+    return this.riskService.findAll(companyId);
   }
 
   /**
    * GET /risk/search
    */
-  @Get('search')
+  @Get(':companyId/search')
   search(
     @Query()
     query: SearchRiskDto,
+    @Param('companyId') companyId: string
   ) {
     return this.riskService.search(
       query,
+      companyId
     );
   }
 
   /**
    * GET /risk/project/:projectId
    */
-  @Get('project/:projectId')
+  @Get(':companyId/project/:projectId')
   findByProject(
     @Param('projectId')
     projectId: string,
+    @Param('companyId') companyId: string
   ) {
     return this.riskService.findByProject(
       projectId,
+      companyId
     );
   }
 
   /**
    * GET /risk/task/:taskId
    */
-  @Get('task/:taskId')
+  @Get(':companyId/task/:taskId')
   findByTask(
     @Param('taskId')
     taskId: string,
+    @Param('companyId') companyId: string
   ) {
     return this.riskService.findByTask(
       taskId,
+      companyId
     );
   }
 
   /**
    * GET /risk/:id
    */
-  @Get(':id')
+  @Get(':companyId/:id')
   findOne(
     @Param('id')
     id: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.riskService.findOne(id);
+    return this.riskService.findOne(id, companyId);
   }
 
   /**
    * PATCH /risk/:id
    */
-  @Patch(':id')
+  @Patch(':companyId/:id')
   update(
     @Param('id')
     id: string,
+    
 
     @Body()
     updateRiskDto: UpdateRiskDto,
+
+    @Param('companyId') companyId: string
+
   ) {
     return this.riskService.update(
       id,
       updateRiskDto,
+      companyId
     );
   }
 
   /**
    * PATCH /risk/:id/status
    */
-  @Patch(':id/status')
+  @Patch(':companyId/:id/status')
   updateStatus(
     @Param('id')
     id: string,
 
     @Body()
     updateRiskDto: UpdateRiskDto,
+
+    @Param('companyId') companyId: string
   ) {
     return this.riskService.updateStatus(
       id,
       updateRiskDto,
+      companyId
     );
   }
 
   /**
    * DELETE /risk/:id
    */
-  @Delete(':id')
+  @Delete(':companyId/:id')
   remove(
     @Param('id')
     id: string,
+    @Param('companyId') companyId: string
+
   ) {
-    return this.riskService.remove(id);
+    return this.riskService.remove(id,companyId);
   }
-}
+} 

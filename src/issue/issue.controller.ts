@@ -17,92 +17,106 @@ import { UpdateIssueDto } from './dto/update-issue.dto';
 
 import { SearchIssueDto } from './dto/search-issue.dto';
 
+
 @Controller('issue')
 export class IssueController {
-  constructor(private readonly issueService: IssueService) {}
+  constructor(private readonly issueService: IssueService) { }
 
-  @Post()
+  @Post(':companyId')
   create(
     @Body()
     createIssueDto: CreateIssueDto,
+    @Param('companyId') companyId: string
   ) {
-    return this.issueService.create(createIssueDto);
+    return this.issueService.create(createIssueDto, companyId);
   }
 
-  @Get()
-  findAll() {
-    return this.issueService.findAll();
+  @Get(':companyId')
+  findAll(@Param('companyId') companyId: string) {
+    return this.issueService.findAll(companyId);
   }
 
-  @Get('search')
+  @Get(':companyId/search')
   search(
     @Query()
     query: SearchIssueDto,
+    @Param('companyId') companyId: string
   ) {
-    return this.issueService.search(query);
+    return this.issueService.search(query, companyId);
   }
 
-  @Get('project/:projectId')
+  @Get(':companyId/project/:projectId')
   findByProject(
     @Param('projectId')
     projectId: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.issueService.findByProject(projectId);
+    return this.issueService.findByProject(projectId, companyId);
   }
 
-  @Get('task/:taskId')
+  @Get(':companyId/task/:taskId')
   findByTask(
     @Param('taskId')
     taskId: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.issueService.findByTask(taskId);
+    return this.issueService.findByTask(taskId, companyId);
   }
 
-  @Get('user/:userId')
+  @Get(':companyId/user/:userId')
   findByUser(
     @Param('userId')
     userId: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.issueService.findByUser(userId);
+    return this.issueService.findByUser(userId, companyId);
   }
 
-  @Get(':id')
+  @Get(':companyId/:id')
   findOne(
     @Param('id')
     id: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.issueService.findOne(id);
+    return this.issueService.findOne(id,companyId);
   }
 
-  @Patch(':id')
+  @Patch(':companyId/:id')
   update(
     @Param('id')
     id: string,
 
     @Body()
     updateIssueDto: UpdateIssueDto,
+
+    @Param('companyId') companyId: string
   ) {
-    return this.issueService.update(id, updateIssueDto);
+    return this.issueService.update(id, updateIssueDto,companyId);
   }
 
-  @Patch(':id/status')
+  @Patch(':companyId/:id/status')
   updateStatus(
     @Param('id')
     id: string,
+
+    @Param('companyId') companyId: string,
 
     @Body()
     body: {
       status: string;
     },
+    
   ) {
-    return this.issueService.updateStatus(id, body.status);
+    return this.issueService.updateStatus(id, body.status,companyId);
   }
 
-  @Delete(':id')
+  @Delete(':companyId/:id')
   remove(
     @Param('id')
     id: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.issueService.remove(id);
+    return this.issueService.remove(id,companyId);
   }
 }
+ 

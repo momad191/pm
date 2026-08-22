@@ -2,7 +2,7 @@ import { IsOptional, IsString, IsDateString } from 'class-validator';
 
 export class SearchProjectDto {
   @IsOptional()
-  companyId?: string;
+  companyId?: string; 
 
   @IsOptional()
   @IsString()

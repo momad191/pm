@@ -17,7 +17,7 @@ export enum TaskStatus {
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }
-  
+
 export enum TaskPriority {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',
@@ -36,7 +36,6 @@ export class Task {
   })
   companyId: Types.ObjectId;
 
-
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
@@ -44,18 +43,12 @@ export class Task {
   })
   createdBy: Types.ObjectId;
 
-
-
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
     required: false,
   })
   updatedBy: Types.ObjectId;
-
-
-
-
 
   @Prop({
     required: false,
@@ -88,9 +81,16 @@ export class Task {
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false,
   })
   assignedTo: Types.ObjectId;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Team',
+    required: false,
+  })
+  assignedToTeam: Types.ObjectId;
 
   @Prop({
     enum: TaskPriority,

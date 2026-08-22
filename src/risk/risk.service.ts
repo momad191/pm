@@ -42,7 +42,8 @@ export class RiskService {
     return counter.seq;
   }
 
-  async create(createRiskDto: CreateRiskDto) {
+  async create(createRiskDto: CreateRiskDto, companyId: string) {
+    companyId = companyId;
     const nextRiskId = await this.getNextRiskId();
 
     const exists = await this.riskModel.findOne({
@@ -81,10 +82,11 @@ export class RiskService {
     return risk;
   }
 
-  async findAll() {
+  async findAll(companyId: string) {
     return this.riskModel
       .find({
         isDeleted: false,
+        companyId: companyId
       })
 
       .populate('projectId')
@@ -96,7 +98,8 @@ export class RiskService {
       });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, companyId: string) {
+    companyId = companyId;
     const risk = await this.riskModel
 
       .findById(id)
@@ -116,7 +119,11 @@ export class RiskService {
     id: string,
 
     updateRiskDto: UpdateRiskDto,
+
+    companyId: string
   ) {
+
+    companyId = companyId;
     const risk = await this.riskModel.findByIdAndUpdate(
       id,
 
@@ -136,7 +143,8 @@ export class RiskService {
     return risk;
   }
 
-  async remove(id: string) {
+  async remove(id: string, companyId: string) {
+    companyId = companyId;
     const risk = await this.riskModel.findByIdAndUpdate(
       id,
 
@@ -160,7 +168,7 @@ export class RiskService {
     };
   }
 
-  async search(query: SearchRiskDto) {
+  async search(query: SearchRiskDto, companyId: string) {
     const {
       keyword,
 
@@ -183,6 +191,7 @@ export class RiskService {
 
     const filter: any = {
       isDeleted: false,
+      companyId: companyId
     };
 
     if (keyword) {
@@ -266,13 +275,15 @@ export class RiskService {
     };
   }
 
-  async findByProject(projectId: string) {
+  async findByProject(projectId: string, companyId: string) {
     return this.riskModel
 
       .find({
         projectId,
 
         isDeleted: false,
+
+        companyId: companyId
       })
 
       .populate('projectId')
@@ -284,13 +295,15 @@ export class RiskService {
       });
   }
 
-  async findByTask(taskId: string) {
+  async findByTask(taskId: string,companyId: string) {
     return this.riskModel
 
       .find({
         taskId,
 
         isDeleted: false,
+
+        companyId:companyId
       })
 
       .populate('projectId')
@@ -306,9 +319,11 @@ export class RiskService {
     id: string,
 
     updateRiskDto: UpdateRiskDto,
+
+    companyId: string
   ) {
 
-
+    companyId=companyId;
 
 
     const risk = await this.riskModel.findByIdAndUpdate(

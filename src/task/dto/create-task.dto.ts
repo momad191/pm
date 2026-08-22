@@ -16,7 +16,6 @@ export class CreateTaskDto {
   @IsMongoId()
   createdBy?: string;
 
-
   @IsMongoId()
   updatedBy?: string;
 
@@ -39,6 +38,9 @@ export class CreateTaskDto {
 
   @IsMongoId()
   assignedTo: string;
+
+  @IsMongoId()
+  assignedToTeam: string;
 
   @IsOptional()
   @IsEnum(TaskPriority)

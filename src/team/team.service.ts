@@ -29,7 +29,7 @@ export class TeamService {
     @InjectModel(TeamCounter.name)
     private counterModel: Model<TeamCounterDocument>,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async getNextTeamId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
@@ -45,7 +45,8 @@ export class TeamService {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  async create(dto: CreateTeamDto) {
+  async create(dto: CreateTeamDto, companyId: string) {
+    companyId = companyId
     const nextTeamId = await this.getNextTeamId();
 
     const team = await this.teamModel.create({
@@ -59,10 +60,11 @@ export class TeamService {
     return team;
   }
 
-  async findAll() {
+  async findAll(companyId: string) {
     return await this.teamModel
       .find({
         isDeleted: false,
+        companyId: companyId
       })
       .populate('teamLead')
       .populate('members')
@@ -73,7 +75,7 @@ export class TeamService {
       });
   }
 
-  async search(query: SearchTeamDto) {
+  async search(query: SearchTeamDto, companyId: string) {
     const {
       search,
       department,
@@ -87,6 +89,7 @@ export class TeamService {
 
     const filter: any = {
       isDeleted: false,
+      companyId: companyId
     };
 
     if (search?.trim()) {
@@ -152,11 +155,12 @@ export class TeamService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, companyId: string) {
     const team = await this.teamModel
       .findOne({
         _id: id,
         isDeleted: false,
+        companyId: companyId
       })
       .populate('teamLead')
       .populate('members')
@@ -170,33 +174,36 @@ export class TeamService {
     return team;
   }
 
-  async findByLead(userId: string) {
+  async findByLead(userId: string, companyId: string) {
     return await this.teamModel
       .find({
         teamLead: userId,
         isDeleted: false,
+        companyId: companyId
       })
       .populate('members')
       .populate('projects')
       .populate('tasks');
   }
 
-  async findByMember(userId: string) {
+  async findByMember(userId: string, companyId: string) {
     return await this.teamModel
       .find({
         members: userId,
         isDeleted: false,
+        companyId: companyId
       })
       .populate('teamLead')
       .populate('projects')
       .populate('tasks');
   }
 
-  async update(id: string, dto: UpdateTeamDto) {
+  async update(id: string, dto: UpdateTeamDto, companyId: string) {
     const team = await this.teamModel.findOneAndUpdate(
       {
         _id: id,
         isDeleted: false,
+        companyId: companyId
       },
       dto,
       {
@@ -213,10 +220,11 @@ export class TeamService {
     return team;
   }
 
-  async addMember(id: string, userId: string) {
+  async addMember(id: string, userId: string, companyId: string) {
     const team = await this.teamModel.findOne({
       _id: id,
       isDeleted: false,
+      companyId: companyId
     });
 
     if (!team) {
@@ -238,10 +246,11 @@ export class TeamService {
     return team.populate('members');
   }
 
-  async removeMember(id: string, userId: string) {
+  async removeMember(id: string, userId: string, companyId: string) {
     const team = await this.teamModel.findOne({
       _id: id,
       isDeleted: false,
+      companyId: companyId
     });
 
     if (!team) {
@@ -259,11 +268,12 @@ export class TeamService {
     return team.populate('members');
   }
 
-  async changeLead(id: string, teamLead: string) {
+  async changeLead(id: string, teamLead: string, companyId: string) {
     const team = await this.teamModel.findOneAndUpdate(
       {
         _id: id,
         isDeleted: false,
+        companyId: companyId
       },
       {
         teamLead,
@@ -282,11 +292,12 @@ export class TeamService {
     return team.populate('teamLead');
   }
 
-  async changeStatus(id: string, status: string) {
+  async changeStatus(id: string, status: string, companyId: string) {
     const team = await this.teamModel.findOneAndUpdate(
       {
         _id: id,
         isDeleted: false,
+        companyId: companyId
       },
       {
         status,
@@ -302,14 +313,15 @@ export class TeamService {
 
     this.eventEmitter.emit('team.updated', new TeamUpdatedEvent(team));
 
-    
+
     return team;
   }
 
-  async remove(id: string) {
+  async remove(id: string,companyId: string) {
     const team = await this.teamModel.findOneAndUpdate(
       {
         _id: id,
+        companyId:companyId
       },
       {
         isDeleted: true,

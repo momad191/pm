@@ -17,7 +17,7 @@ import { SearchTeamDto } from './dto/search-team.dto';
 
 @Controller('team')
 export class TeamController {
-  constructor(private readonly teamService: TeamService) {}
+  constructor(private readonly teamService: TeamService) { }
 
   /**
    * ------------------------------------
@@ -25,12 +25,13 @@ export class TeamController {
    * POST /team
    * ------------------------------------
    */
-  @Post()
+  @Post(':companyId')
   create(
     @Body()
     createTeamDto: CreateTeamDto,
+    @Param('companyId') companyId: string
   ) {
-    return this.teamService.create(createTeamDto);
+    return this.teamService.create(createTeamDto, companyId);
   }
 
   /**
@@ -39,9 +40,9 @@ export class TeamController {
    * GET /team
    * ------------------------------------
    */
-  @Get()
-  findAll() {
-    return this.teamService.findAll();
+  @Get(':companyId')
+  findAll(@Param('companyId') companyId: string) {
+    return this.teamService.findAll(companyId);
   }
 
   /**
@@ -50,12 +51,13 @@ export class TeamController {
    * GET /team/search
    * ------------------------------------
    */
-  @Get('search')
+  @Get(':companyId/search')
   search(
     @Query()
     query: SearchTeamDto,
+    @Param('companyId') companyId: string
   ) {
-    return this.teamService.search(query);
+    return this.teamService.search(query, companyId);
   }
 
   /**
@@ -64,12 +66,13 @@ export class TeamController {
    * GET /team/lead/:userId
    * ------------------------------------
    */
-  @Get('lead/:userId')
+  @Get(':companyId/lead/:userId')
   findByLead(
     @Param('userId')
     userId: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.teamService.findByLead(userId);
+    return this.teamService.findByLead(userId, companyId);
   }
 
   /**
@@ -78,12 +81,13 @@ export class TeamController {
    * GET /team/member/:userId
    * ------------------------------------
    */
-  @Get('member/:userId')
+  @Get(':companyId/member/:userId')
   findByMember(
     @Param('userId')
     userId: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.teamService.findByMember(userId);
+    return this.teamService.findByMember(userId, companyId);
   }
 
   /**
@@ -92,12 +96,13 @@ export class TeamController {
    * GET /team/:id
    * ------------------------------------
    */
-  @Get(':id')
+  @Get(':companyId/:id')
   findOne(
     @Param('id')
     id: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.teamService.findOne(id);
+    return this.teamService.findOne(id, companyId);
   }
 
   /**
@@ -106,15 +111,15 @@ export class TeamController {
    * PATCH /team/:id
    * ------------------------------------
    */
-  @Patch(':id')
+  @Patch(':companyId/:id')
   update(
     @Param('id')
     id: string,
-
+    @Param('companyId') companyId: string,
     @Body()
     updateTeamDto: UpdateTeamDto,
   ) {
-    return this.teamService.update(id, updateTeamDto);
+    return this.teamService.update(id, updateTeamDto, companyId);
   }
 
   /**
@@ -123,15 +128,17 @@ export class TeamController {
    * PATCH /team/:id/add-member
    * ------------------------------------
    */
-  @Patch(':id/add-member')
+  @Patch(':companyId/:id/add-member')
   addMember(
     @Param('id')
     id: string,
 
+    @Param('companyId') companyId: string,
+
     @Body('userId')
     userId: string,
   ) {
-    return this.teamService.addMember(id, userId);
+    return this.teamService.addMember(id, userId, companyId);
   }
 
   /**
@@ -140,15 +147,17 @@ export class TeamController {
    * PATCH /team/:id/remove-member
    * ------------------------------------
    */
-  @Patch(':id/remove-member')
+  @Patch(':companyId/:id/remove-member')
   removeMember(
     @Param('id')
     id: string,
 
+    @Param('companyId') companyId: string,
+
     @Body('userId')
     userId: string,
   ) {
-    return this.teamService.removeMember(id, userId);
+    return this.teamService.removeMember(id, userId, companyId);
   }
 
   /**
@@ -157,15 +166,17 @@ export class TeamController {
    * PATCH /team/:id/change-lead
    * ------------------------------------
    */
-  @Patch(':id/change-lead')
+  @Patch(':companyId/:id/change-lead')
   changeLead(
     @Param('id')
     id: string,
 
+    @Param('companyId') companyId: string,
+
     @Body('teamLead')
     teamLead: string,
   ) {
-    return this.teamService.changeLead(id, teamLead);
+    return this.teamService.changeLead(id, teamLead, companyId);
   }
 
   /**
@@ -174,15 +185,17 @@ export class TeamController {
    * PATCH /team/:id/status
    * ------------------------------------
    */
-  @Patch(':id/status')
+  @Patch(':companyId/:id/status')
   changeStatus(
     @Param('id')
     id: string,
 
+    @Param('companyId') companyId: string,
+
     @Body('status')
     status: string,
   ) {
-    return this.teamService.changeStatus(id, status);
+    return this.teamService.changeStatus(id, status,companyId);
   }
 
   /**
@@ -191,11 +204,12 @@ export class TeamController {
    * DELETE /team/:id
    * ------------------------------------
    */
-  @Delete(':id')
+  @Delete(':companyId/:id')
   remove(
     @Param('id')
     id: string,
+    @Param('companyId') companyId: string
   ) {
-    return this.teamService.remove(id);
+    return this.teamService.remove(id,companyId);
   }
-}
+} 

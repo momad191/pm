@@ -21,7 +21,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TaskCreatedEvent } from './events/task-created.event';
 import { TaskUpdatedEvent } from './events/task-updated.event';
 
-
 @Injectable()
 export class TaskService {
   constructor(
@@ -42,9 +41,12 @@ export class TaskService {
     return counter.seq;
   }
 
-  async create(createTaskDto: CreateTaskDto) {
+  async create(createTaskDto: CreateTaskDto, companyId: string) {
+    companyId = companyId;
+    const taskId = `TASK-${await this.getNextTaskId()}`;
+
     const existingTask = await this.taskModel.findOne({
-      taskId: createTaskDto.taskId,
+      taskId,
       isDeleted: false,
     });
 
@@ -52,34 +54,52 @@ export class TaskService {
       throw new ConflictException('Task ID already exists');
     }
 
-    const task = await this.taskModel.create({
+    const cleanData: Partial<CreateTaskDto> & { taskId: string } = {
       ...createTaskDto,
-      taskId: `TASK-${await this.getNextTaskId()}`,
-    });
+      taskId,
+    };
+
+    // Remove empty assigned user
+    if (!cleanData.assignedTo) {
+      delete cleanData.assignedTo;
+    }
+
+    // Remove empty assigned team
+    if (!cleanData.assignedToTeam) {
+      delete cleanData.assignedToTeam;
+    }
+
+    const task = new this.taskModel(cleanData);
+
+    await task.save();
 
     this.eventEmitter.emit('task.created', new TaskCreatedEvent(task));
 
     return task;
   }
 
-  async findAll() {
+  async findAll(companyId: string) {
     return this.taskModel
       .find({
         isDeleted: false,
+        companyId: companyId
       })
       .populate('projectId')
       .populate('sprintId')
       .populate('assignedTo', '-password')
+      .populate('assignedToTeam')
       .sort({
         createdAt: -1,
       });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, companyId: string) {
+    companyId = companyId
     const task = await this.taskModel
       .findById(id)
       .populate('projectId')
       .populate('sprintId')
+      .populate('assignedToTeam')
       .populate('assignedTo', '-password');
 
     if (!task) {
@@ -89,9 +109,20 @@ export class TaskService {
     return task;
   }
 
-  async update(id: string, updateTaskDto: UpdateTaskDto) {
 
-    const task = await this.taskModel.findByIdAndUpdate(id, updateTaskDto, {
+  async update(id: string, updateTaskDto: UpdateTaskDto, companyId: string) {
+    const cleanData: any = { ...updateTaskDto };
+
+    // Remove empty assigned user
+    if (!cleanData.assignedTo) {
+      delete cleanData.assignedTo;
+    }
+    // Remove empty assigned team
+    if (!cleanData.assignedToTeam) {
+      delete cleanData.assignedToTeam;
+    }
+
+    const task = await this.taskModel.findByIdAndUpdate(id, cleanData, {
       returnDocument: 'after',
     });
 
@@ -100,7 +131,6 @@ export class TaskService {
     }
 
     this.eventEmitter.emit('task.updated', new TaskUpdatedEvent(task));
-
     return task;
   }
 
@@ -125,19 +155,21 @@ export class TaskService {
   //   };
   // }
 
-  async remove(id: string): Promise<{ message: string }> {
+  async remove(id: string, companyId: string): Promise<{ message: string }> {
+    companyId = companyId
     if (!isValidObjectId(id)) throw new BadRequestException('Invalid task ID');
     const deleted = await this.taskModel.findByIdAndDelete(id);
     if (!deleted) throw new NotFoundException('task not found');
     return { message: `task ${id} deleted` };
   }
 
-  async search(query: SearchTaskDto) {
+  async search(query: SearchTaskDto, companyId: string) {
     const {
       keyword,
       projectId,
       sprintId,
       assignedTo,
+      assignedToTeam,
       priority,
       status,
       page = 1,
@@ -148,6 +180,7 @@ export class TaskService {
 
     const filter: Record<string, unknown> = {
       isDeleted: false,
+      companyId: companyId
     };
 
     if (keyword) {
@@ -184,6 +217,9 @@ export class TaskService {
     if (assignedTo) {
       filter.assignedTo = assignedTo;
     }
+    if (assignedToTeam) {
+      filter.assignedToTeam = assignedToTeam;
+    }
 
     if (priority) {
       filter.priority = priority;
@@ -202,6 +238,7 @@ export class TaskService {
       .populate('projectId')
       .populate('sprintId')
       .populate('assignedTo', '-password')
+      .populate('assignedToTeam')
       .sort({
         [sortBy]: sortOrder === 'asc' ? 1 : -1,
       })
@@ -220,21 +257,24 @@ export class TaskService {
     };
   }
 
-  async findByProject(projectId: string) {
+  async findByProject(projectId: string, companyId: string) {
     return this.taskModel
       .find({
         projectId,
         isDeleted: false,
+        companyId: companyId
       })
       .populate('projectId')
       .populate('sprintId')
       .populate('assignedTo', '-password')
+      .populate('assignedToTeam')
       .sort({
         createdAt: -1,
       });
   }
 
-  async findBySprint(sprintId: string) {
+  async findBySprint(sprintId: string, companyId: string) {
+    companyId = companyId;
     return this.taskModel
       .find({
         sprintId,
@@ -243,12 +283,14 @@ export class TaskService {
       .populate('projectId')
       .populate('sprintId')
       .populate('assignedTo', '-password')
+      .populate('assignedToTeam')
       .sort({
         createdAt: -1,
       });
   }
 
-  async findByUser(userId: string) {
+  async findByUser(userId: string, companyId: string) {
+    companyId = companyId;
     return this.taskModel
       .find({
         assignedTo: userId,
@@ -257,13 +299,15 @@ export class TaskService {
       .populate('projectId')
       .populate('sprintId')
       .populate('assignedTo', '-password')
+      .populate('assignedToTeam')
       .sort({
         createdAt: -1,
       });
   }
 
-  async updateStatus(id: string, updateTaskDto: UpdateTaskDto) {
+  async updateStatus(id: string, updateTaskDto: UpdateTaskDto, companyId: string) {
 
+    companyId = companyId;
     const task = await this.taskModel.findByIdAndUpdate(id, updateTaskDto, {
       returnDocument: 'after',
     });
@@ -271,7 +315,6 @@ export class TaskService {
     if (!task) {
       throw new NotFoundException('Task not found');
     }
-
 
     this.eventEmitter.emit('task.updated', new TaskUpdatedEvent(task));
 

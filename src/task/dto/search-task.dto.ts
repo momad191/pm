@@ -17,6 +17,9 @@ export class SearchTaskDto {
   assignedTo?: string;
 
   @IsOptional()
+  assignedToTeam?: string;
+
+  @IsOptional()
   priority?: string;
 
   @IsOptional()

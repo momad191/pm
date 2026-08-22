@@ -21,41 +21,40 @@ import { SearchProjectDto } from './dto/search-project.dto';
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) { }
 
-  @Post()
-  create(@Body() dto: CreateProjectDto) 
-  {
+  @Post(':companyId')
+  create(@Body() dto: CreateProjectDto, @Param('companyId') companyId: string) {
     // const createdBy = (req as any).user?._id;
-    return this.projectService.create(dto);
+    return this.projectService.create(dto, companyId);
   }
 
-  @Get('dashboard')
-  dashboard() {
-    return this.projectService.dashboard();
+  @Get(':companyId/dashboard')
+  dashboard(@Param('companyId') companyId: string) {
+    return this.projectService.dashboard(companyId);
   }
 
 
-  @Get()
-  findAll() {
-    return this.projectService.findAll();
+  @Get(':companyId')
+  findAll(@Param('companyId') companyId: string) {
+    return this.projectService.findAll(companyId);
   }
 
-  @Get('search')
-  search(@Query() query: SearchProjectDto) {
-    return this.projectService.search(query);
+  @Get(':companyId/search')
+  search(@Query() query: SearchProjectDto, @Param('companyId') companyId: string) {
+    return this.projectService.search(query, companyId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.projectService.findOne(id);
+  @Get(':companyId/:id')
+  findOne(@Param('id') id: string, @Param('companyId') companyId: string) {
+    return this.projectService.findOne(id,companyId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
-    return this.projectService.update(id, dto);
+  @Patch(':companyId/:id')
+  update(@Param('id') id: string, @Body() dto: UpdateProjectDto, @Param('companyId') companyId: string) {
+    return this.projectService.update(id, dto, companyId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.projectService.remove(id);
+  @Delete(':companyId/:id')
+  remove(@Param('id') id: string, @Param('companyId') companyId: string) {
+    return this.projectService.remove(id,companyId);
   }
 }

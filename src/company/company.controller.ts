@@ -41,7 +41,7 @@ export class CompanyController {
    */
   @Get()
   findAll() {
-    return this.companyService.findAll();
+    return this.companyService.findAll(); 
   }
 
   /**
@@ -50,7 +50,7 @@ export class CompanyController {
    * GET /company/search
    * ------------------------------------
    */
-  @Get('search')
+  @Get('search') 
   search(
     @Query()
     query: SearchCompanyDto,

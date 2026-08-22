@@ -30,7 +30,7 @@ export class IssueService {
     @InjectModel(IssueCounter.name)
     private readonly counterModel: Model<IssueCounterDocument>,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async getNextIssueId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
@@ -42,7 +42,8 @@ export class IssueService {
     return counter.seq;
   }
 
-  async create(createIssueDto: CreateIssueDto) {
+  async create(createIssueDto: CreateIssueDto, companyId: string) {
+    companyId = companyId;
     const nextIssueId = await this.getNextIssueId();
 
     const issue = await this.issueModel.create({
@@ -55,10 +56,11 @@ export class IssueService {
     return issue;
   }
 
-  async findAll() {
+  async findAll(companyId: string) {
     return this.issueModel
       .find({
         isDeleted: false,
+        companyId: companyId
       })
 
       .populate('projectId')
@@ -74,7 +76,10 @@ export class IssueService {
       });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, companyId: string) {
+
+    companyId = companyId;
+
     const issue = await this.issueModel
 
       .findById(id)
@@ -96,9 +101,10 @@ export class IssueService {
 
   async update(
     id: string,
-
     updateIssueDto: UpdateIssueDto,
+    companyId: string
   ) {
+    companyId = companyId;
     const issue = await this.issueModel.findByIdAndUpdate(
       id,
 
@@ -118,7 +124,8 @@ export class IssueService {
     return issue;
   }
 
-  async remove(id: string) {
+  async remove(id: string, companyId: string) {
+    companyId = companyId;
     const issue = await this.issueModel.findByIdAndUpdate(
       id,
 
@@ -142,7 +149,7 @@ export class IssueService {
     };
   }
 
-  async search(query: SearchIssueDto) {
+  async search(query: SearchIssueDto, companyId: string) {
     const {
       keyword,
 
@@ -167,6 +174,7 @@ export class IssueService {
 
     const filter: any = {
       isDeleted: false,
+      companyId: companyId
     };
 
     if (keyword) {
@@ -258,12 +266,13 @@ export class IssueService {
     };
   }
 
-  async findByProject(projectId: string) {
+  async findByProject(projectId: string, companyId: string) {
     return this.issueModel
       .find({
         projectId,
 
         isDeleted: false,
+        companyId: companyId
       })
 
       .populate('projectId')
@@ -279,12 +288,14 @@ export class IssueService {
       });
   }
 
-  async findByTask(taskId: string) {
+  async findByTask(taskId: string, companyId: string) {
     return this.issueModel
       .find({
         taskId,
 
         isDeleted: false,
+
+        companyId: companyId
       })
 
       .populate('projectId')
@@ -300,12 +311,14 @@ export class IssueService {
       });
   }
 
-  async findByUser(userId: string) {
+  async findByUser(userId: string, companyId: string) {
     return this.issueModel
       .find({
         assignedTo: userId,
 
         isDeleted: false,
+
+        companyId: companyId
       })
 
       .populate('projectId')
@@ -325,7 +338,11 @@ export class IssueService {
     id: string,
 
     status: string,
+
+    companyId: string
   ) {
+
+    companyId=companyId;
     const issue = await this.issueModel.findById(id);
 
     if (!issue) {

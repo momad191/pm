@@ -15,16 +15,16 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 
 import { SearchProjectDto } from './dto/search-project.dto';
- 
+
 import {
   ProjectCounter,
   ProjectCounterDocument,
 } from './schemas/counter.schema';
- 
+
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ProjectCreatedEvent } from './events/project-created.event';
 import { ProjectUpdatedEvent } from './events/project-updated.event';
- 
+
 @Injectable()
 export class ProjectService {
   constructor(
@@ -32,7 +32,7 @@ export class ProjectService {
     @InjectModel(ProjectCounter.name)
     private counterModel: Model<ProjectCounterDocument>,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async getNextProjectId(): Promise<number> {
     const counter = await this.counterModel.findOneAndUpdate(
@@ -44,8 +44,10 @@ export class ProjectService {
     return counter.seq;
   }
 
-  async create(dto: CreateProjectDto) {
+  async create(dto: CreateProjectDto, companyId: string) {
     const nextProjectId = await this.getNextProjectId();
+
+    companyId = companyId;
 
     // const exists =
     //   await this.projectModel.findOne({
@@ -67,7 +69,7 @@ export class ProjectService {
       month = String(startDate.getMonth() + 1);
       year = String(startDate.getFullYear());
     }
- 
+
     const project = await this.projectModel.create({
       ...dto,
       projectId: `PRO-${nextProjectId.toString()}`,
@@ -86,11 +88,13 @@ export class ProjectService {
     return project;
   }
 
-  async findAll() {
-    return this.projectModel.find({ isDeleted: false }).sort({ createdAt: -1 });
+  async findAll(companyId: string) {
+    return this.projectModel.find({ isDeleted: false, companyId: companyId }).sort({ createdAt: -1 });
   }
- 
-  async findOne(id: string) {
+
+  async findOne(id: string, companyId: string) {
+
+    companyId = companyId
     const project = await this.projectModel.findById(id);
 
     if (!project) {
@@ -100,7 +104,9 @@ export class ProjectService {
     return project;
   }
 
-  async update(id: string, dto: UpdateProjectDto) {
+  async update(id: string, dto: UpdateProjectDto, companyId: string) {
+
+    companyId = companyId
     const project = await this.projectModel.findByIdAndUpdate(id, dto, {
       returnDocument: 'after',
     });
@@ -126,7 +132,8 @@ export class ProjectService {
   //     { returnDocument: 'after' },
   //   );
   // }
-  async remove(id: string): Promise<{ message: string }> {
+  async remove(id: string, companyId: string): Promise<{ message: string }> {
+    companyId = companyId
     if (!isValidObjectId(id))
       throw new BadRequestException('Invalid product ID');
     const deleted = await this.projectModel.findByIdAndDelete(id);
@@ -139,7 +146,7 @@ export class ProjectService {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  async search(query: SearchProjectDto) {
+  async search(query: SearchProjectDto, companyId: string) {
     const {
       search,
       projectId,
@@ -160,6 +167,8 @@ export class ProjectService {
 
     const filter: any = {
       // isDeleted: false,
+      companyId: companyId
+
     };
 
     if (search?.trim()) {
@@ -296,11 +305,13 @@ export class ProjectService {
     };
   }
 
-  async dashboard() {
+  async dashboard(companyId: string) {
+
     const result = await this.projectModel.aggregate([
       {
         $match: {
           isDeleted: false,
+          companyId:companyId
         },
       },
 
